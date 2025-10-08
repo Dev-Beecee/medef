@@ -11,12 +11,13 @@ import { toast } from 'sonner';
 import { UserPlus, Shield, Mail, User } from 'lucide-react';
 
 interface AdminUser {
-  id?: number;
+  id: number;
   email: string;
   role: 'admin' | 'super_admin';
-  is_active: boolean;
-  created_at?: string;
-  last_login?: string;
+  is_active: boolean | null;
+  created_at: string | null;
+  last_login?: string | null;
+  auth_user_id?: string | null;
 }
 
 interface CreateAdminUserProps {
