@@ -33,7 +33,7 @@ interface VideoStats {
   totalVotes: number;
   approvedVotes: number;
   categories: string[];
-  videoUrl: string;
+  videoUrl: string | null;
 }
 
 interface TopVideo extends VideoStats {
@@ -106,10 +106,10 @@ export default function GhostStatsPage() {
           nomCandidat: participation.nom_candidat,
           totalVotes: 0,
           approvedVotes: 0,
-          categories: participation.categories_selectionnees.map((catId: string) => {
+          categories: participation.categories_selectionnees?.map((catId: string) => {
             const category = categoriesData.find(c => c.id === parseInt(catId));
             return category?.name || `Catégorie ${catId}`;
-          }),
+          }) || [],
           videoUrl: participation.video_s3_url
         });
       });
@@ -140,7 +140,7 @@ export default function GhostStatsPage() {
 
       // Compter les participations par catégorie
       participationsData.forEach(participation => {
-        participation.categories_selectionnees.forEach((catId: string) => {
+        participation.categories_selectionnees?.forEach((catId: string) => {
           const categoryId = parseInt(catId);
           if (categoryStatsMap.has(categoryId)) {
             categoryStatsMap.get(categoryId)!.participationCount++;
@@ -304,14 +304,20 @@ export default function GhostStatsPage() {
                             </DialogTitle>
                           </DialogHeader>
                         <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
-                          <video 
-                            controls 
-                            className="w-full h-full"
-                            src={video.videoUrl}
-                            preload="metadata"
-                          >
-                            Votre navigateur ne supporte pas la lecture vidéo.
-                          </video>
+                          {video.videoUrl ? (
+                            <video 
+                              controls 
+                              className="w-full h-full"
+                              src={video.videoUrl}
+                              preload="metadata"
+                            >
+                              Votre navigateur ne supporte pas la lecture vidéo.
+                            </video>
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-gray-400">
+                              <p>Vidéo non disponible</p>
+                            </div>
+                          )}
                         </div>
                         </DialogContent>
                       </Dialog>
@@ -405,14 +411,20 @@ export default function GhostStatsPage() {
                             </DialogTitle>
                           </DialogHeader>
                         <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
-                          <video 
-                            controls 
-                            className="w-full h-full"
-                            src={video.videoUrl}
-                            preload="metadata"
-                          >
-                            Votre navigateur ne supporte pas la lecture vidéo.
-                          </video>
+                          {video.videoUrl ? (
+                            <video 
+                              controls 
+                              className="w-full h-full"
+                              src={video.videoUrl}
+                              preload="metadata"
+                            >
+                              Votre navigateur ne supporte pas la lecture vidéo.
+                            </video>
+                          ) : (
+                            <div className="flex items-center justify-center h-full text-gray-400">
+                              <p>Vidéo non disponible</p>
+                            </div>
+                          )}
                         </div>
                         </DialogContent>
                       </Dialog>

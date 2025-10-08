@@ -73,11 +73,13 @@ type Participation = {
   attestation_regularite_s3_url: string | null
   fiche_insee_kbis_s3_url: string | null
   signature_image_s3_url: string | null
+  attestation_dirigeant_s3_url: string | null
   acceptation_reglement: boolean | null
   etape_actuelle: number | null
   formulaire_complete: boolean | null
   created_at: string | null
   updated_at: string | null
+  user_id: string | null
 }
 
 export default function ParticipationsPage() {
@@ -88,13 +90,20 @@ export default function ParticipationsPage() {
   const [filterStatut, setFilterStatut] = useState<string>('all')
   const [isExportingPDF, setIsExportingPDF] = useState(false)
   const [showProgressDialog, setShowProgressDialog] = useState(false)
-  const [exportProgress, setExportProgress] = useState({
+  const [exportProgress, setExportProgress] = useState<{
+    current: number
+    total: number
+    currentFileName: string
+    stage: 'preparing' | 'generating' | 'zipping' | 'completed' | 'error'
+    completedFiles: string[]
+    failedFiles: string[]
+  }>({
     current: 0,
     total: 0,
     currentFileName: '',
-    stage: 'preparing' as const,
-    completedFiles: [] as string[],
-    failedFiles: [] as string[]
+    stage: 'preparing',
+    completedFiles: [],
+    failedFiles: []
   })
 
   const [categoryNames, setCategoryNames] = useState<{ [key: string]: string }>({})

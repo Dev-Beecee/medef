@@ -1,3 +1,4 @@
+import React from 'react'
 import { pdf } from '@react-pdf/renderer'
 import JSZip from 'jszip'
 import { ParticipationPDFTemplate } from '@/components/ParticipationPDFTemplate'
@@ -15,6 +16,7 @@ type Participation = {
   email: string
   telephone: string | null
   statut: string | null
+  video_s3_url: string | null
   adresse_siege_social: string | null
   date_creation: string | null
   forme_juridique: string | null
@@ -40,11 +42,16 @@ type Participation = {
   axes_progres: string | null
   categories_selectionnees: string[] | null
   autorisation_diffusion_video: boolean | null
+  attestation_regularite_s3_url: string | null
+  fiche_insee_kbis_s3_url: string | null
+  signature_image_s3_url: string | null
+  attestation_dirigeant_s3_url: string | null
   acceptation_reglement: boolean | null
   etape_actuelle: number | null
   formulaire_complete: boolean | null
   created_at: string | null
   updated_at: string | null
+  user_id: string | null
 }
 
 // Fonction pour récupérer les noms des catégories depuis la base de données
@@ -83,22 +90,30 @@ export const exportParticipationsToPDF = async (
     failedFiles: string[]
   }) => void
 ) => {
-  try {
-    // État de progression
-    let progressState = {
-      current: 0,
-      total: 0,
-      currentFileName: '',
-      stage: 'preparing' as const,
-      completedFiles: [] as string[],
-      failedFiles: [] as string[]
-    }
+  // État de progression
+  let progressState: {
+    current: number
+    total: number
+    currentFileName: string
+    stage: 'preparing' | 'generating' | 'zipping' | 'completed' | 'error'
+    completedFiles: string[]
+    failedFiles: string[]
+  } = {
+    current: 0,
+    total: 0,
+    currentFileName: '',
+    stage: 'preparing',
+    completedFiles: [],
+    failedFiles: []
+  }
 
-    // Callback de progression
-    const updateProgress = (updates: Partial<typeof progressState>) => {
-      progressState = { ...progressState, ...updates }
-      onProgress?.(progressState)
-    }
+  // Callback de progression
+  const updateProgress = (updates: Partial<typeof progressState>) => {
+    progressState = { ...progressState, ...updates }
+    onProgress?.(progressState)
+  }
+
+  try {
 
     // Pré-charger l'image header en base64
     let headerImageBase64: string | null = null
@@ -163,7 +178,7 @@ export const exportParticipationsToPDF = async (
         }
 
         // Générer le PDF
-        const pdfBlob = await pdf(ParticipationPDFTemplate({ participation, headerImageBase64, categoryNames, signatureImageBase64 })).toBlob()
+        const pdfBlob = await pdf(<ParticipationPDFTemplate participation={participation} headerImageBase64={headerImageBase64} categoryNames={categoryNames} signatureImageBase64={signatureImageBase64} />).toBlob()
         
         // Ajouter le PDF au ZIP
         zip.file(fileName, pdfBlob)
@@ -266,7 +281,7 @@ export const exportSingleParticipationToPDF = async (participation: Participatio
     }
 
     // Générer le PDF
-    const pdfBlob = await pdf(ParticipationPDFTemplate({ participation, headerImageBase64, categoryNames, signatureImageBase64 })).toBlob()
+    const pdfBlob = await pdf(<ParticipationPDFTemplate participation={participation} headerImageBase64={headerImageBase64} categoryNames={categoryNames} signatureImageBase64={signatureImageBase64} />).toBlob()
     
     // Créer un nom de fichier sécurisé
     const safeName = participation.denomination_commerciale 

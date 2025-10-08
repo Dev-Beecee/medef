@@ -16,8 +16,10 @@ import {
   Loader2
 } from 'lucide-react';
 
+type TableName = 'admin_users' | 'vote_categories' | 'participations' | 'date_participation' | 'date_vote' | 'votes';
+
 interface TableInfo {
-  name: string;
+  name: TableName;
   displayName: string;
   description: string;
   icon: React.ReactNode;
@@ -25,19 +27,19 @@ interface TableInfo {
 
 const TABLES_TO_CLEAR: TableInfo[] = [
   {
-    name: 'participations',
+    name: 'participations' as const,
     displayName: 'Participations',
     description: 'Toutes les candidatures soumises',
     icon: <Database className="w-4 h-4" />
   },
   {
-    name: 'vote_categories',
+    name: 'vote_categories' as const,
     displayName: 'Catégories de vote',
     description: 'Catégories disponibles pour le vote',
     icon: <Database className="w-4 h-4" />
   },
   {
-    name: 'votes',
+    name: 'votes' as const,
     displayName: 'Votes',
     description: 'Tous les votes enregistrés',
     icon: <Database className="w-4 h-4" />

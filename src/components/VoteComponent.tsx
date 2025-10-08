@@ -17,7 +17,7 @@ interface Participation {
   nom_candidat: string;
   prenom_candidat: string;
   video_s3_url: string;
-  categories_selectionnees: number[];
+  categories_selectionnees: string[];
   statut: string;
 }
 
@@ -26,6 +26,7 @@ interface Category {
   name: string;
   description: string;
   order_index: number;
+  created_at?: string | null;
 }
 
 interface VoteData {
@@ -65,7 +66,8 @@ const VoteComponent: React.FC = () => {
         .order('order_index');
 
       if (categoriesError) throw categoriesError;
-      setCategories(categoriesData || []);
+      // Toutes les catégories ont description et order_index
+      setCategories((categoriesData || []) as Category[]);
 
       // Récupérer les participations validées avec vidéos
       const { data: participationsData, error: participationsError } = await supabase
@@ -76,7 +78,8 @@ const VoteComponent: React.FC = () => {
         .order('created_at');
 
       if (participationsError) throw participationsError;
-      setParticipations(participationsData || []);
+      // Les participations filtrées ont toujours video_s3_url non null
+      setParticipations((participationsData || []) as Participation[]);
 
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);

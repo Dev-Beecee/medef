@@ -12,7 +12,7 @@ interface Participation {
   nom_candidat: string;
   prenom_candidat: string;
   video_s3_url: string;
-  categories_selectionnees: number[];
+  categories_selectionnees: string[];
   statut: string;
 }
 

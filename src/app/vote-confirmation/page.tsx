@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ interface VoteConfirmationData {
   votedParticipations: string[];
 }
 
-export default function VoteConfirmationPage() {
+function VoteConfirmationContent() {
   const searchParams = useSearchParams();
   const [confirmationData, setConfirmationData] = useState<VoteConfirmationData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -125,5 +125,20 @@ export default function VoteConfirmationPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function VoteConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    }>
+      <VoteConfirmationContent />
+    </Suspense>
   );
 }

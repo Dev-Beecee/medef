@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle, Mail, Calendar, FileText } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-export default function ParticipationConfirmationPage() {
+function ParticipationConfirmationContent() {
   const searchParams = useSearchParams()
   const [participationData, setParticipationData] = useState<{
     nom_etablissement?: string
@@ -153,5 +153,20 @@ export default function ParticipationConfirmationPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ParticipationConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    }>
+      <ParticipationConfirmationContent />
+    </Suspense>
   )
 }
