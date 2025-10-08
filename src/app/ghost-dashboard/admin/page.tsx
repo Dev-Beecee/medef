@@ -67,11 +67,12 @@ export default function AdminUsersPage() {
     setShowCreateForm(false);
   };
 
-  const toggleUserStatus = async (userId: number, currentStatus: boolean) => {
+  const toggleUserStatus = async (userId: number, currentStatus: boolean | null) => {
     try {
+      const newStatus = !currentStatus; // null or false becomes true, true becomes false
       const { error } = await supabase
         .from('admin_users')
-        .update({ is_active: !currentStatus })
+        .update({ is_active: newStatus })
         .eq('id', userId);
 
       if (error) throw error;
@@ -79,12 +80,12 @@ export default function AdminUsersPage() {
       setAdminUsers(prev => 
         prev.map(user => 
           user.id === userId 
-            ? { ...user, is_active: !currentStatus }
+            ? { ...user, is_active: newStatus }
             : user
         )
       );
 
-      toast.success(`Utilisateur ${!currentStatus ? 'activé' : 'désactivé'} avec succès`);
+      toast.success(`Utilisateur ${newStatus ? 'activé' : 'désactivé'} avec succès`);
     } catch (error) {
       console.error('Erreur lors de la modification:', error);
       toast.error('Erreur lors de la modification');
