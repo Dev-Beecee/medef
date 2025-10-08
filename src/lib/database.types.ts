@@ -18,7 +18,7 @@ export type Database = {
         Row: {
           id: number
           email: string
-          role: string
+          role: 'admin' | 'super_admin'
           is_active: boolean | null
           created_at: string | null
           last_login: string | null
@@ -27,7 +27,7 @@ export type Database = {
         Insert: {
           id?: number
           email: string
-          role?: string
+          role?: 'admin' | 'super_admin'
           is_active?: boolean | null
           created_at?: string | null
           last_login?: string | null
@@ -36,7 +36,7 @@ export type Database = {
         Update: {
           id?: number
           email?: string
-          role?: string
+          role?: 'admin' | 'super_admin'
           is_active?: boolean | null
           created_at?: string | null
           last_login?: string | null
