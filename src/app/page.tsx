@@ -1,4 +1,9 @@
+'use client'
+
 import Image from "next/image";
+import Link from "next/link";
+import { BoutonVote } from "@/components/BoutonVote";
+import { BoutonParticipation } from "@/components/BoutonParticipation";
 
 export default function Home() {
   return (
@@ -24,6 +29,48 @@ export default function Home() {
             Save and see your changes instantly.
           </li>
         </ol>
+
+        {/* Boutons dynamiques basés sur les dates */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <BoutonVote />
+          <BoutonParticipation />
+        </div>
+
+        <div className="p-4 border-2 border-green-500/20 bg-green-500/10 rounded-lg">
+          <p className="text-sm font-semibold text-green-600 dark:text-green-400 mb-2">
+            ✅ Supabase configuré avec tables date_vote et date_participation
+          </p>
+          <Link 
+            href="/test-supabase"
+            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            → Tester la connexion Supabase
+          </Link>
+        </div>
+
+        <div className="p-4 border-2 border-blue-500/20 bg-blue-500/10 rounded-lg">
+          <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2">
+            🗳️ Système de Vote disponible
+          </p>
+          <Link 
+            href="/vote"
+            className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            → Accéder au système de vote
+          </Link>
+        </div>
+
+        <div className="p-4 border-2 border-red-500/20 bg-red-500/10 rounded-lg">
+          <p className="text-sm font-semibold text-red-600 dark:text-red-400 mb-2">
+            🛡️ Administration
+          </p>
+          <Link 
+            href="/ghost-dashboard/admin"
+            className="text-sm text-red-600 dark:text-red-400 hover:underline"
+          >
+            → Gérer les administrateurs
+          </Link>
+        </div>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
