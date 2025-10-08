@@ -80,11 +80,11 @@ export function BoutonParticipation({ className = '' }: BoutonParticipationProps
       onClick={handleParticipation}
       className={`
         px-6 py-3 
-        bg-green-600 hover:bg-green-700 
+        bg-black hover:bg-gray-800 
         text-white font-semibold 
         rounded-lg shadow-md 
         transition-colors duration-200
-        focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
         ${className}
       `}
     >
