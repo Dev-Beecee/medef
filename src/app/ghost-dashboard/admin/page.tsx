@@ -26,10 +26,10 @@ interface AdminUser {
   id: number;
   email: string;
   role: 'admin' | 'super_admin';
-  is_active: boolean;
-  created_at: string;
-  last_login?: string;
-  auth_user_id?: string;
+  is_active: boolean | null;
+  created_at: string | null;
+  last_login?: string | null;
+  auth_user_id?: string | null;
 }
 
 export default function AdminUsersPage() {
