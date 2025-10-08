@@ -98,6 +98,64 @@ export type Database = {
         }
         Relationships: []
       }
+      vote_categories: {
+        Row: {
+          id: number
+          name: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: number
+          name: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: number
+          name?: string
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      votes: {
+        Row: {
+          id: string
+          video_id: string
+          category_id: number
+          email: string
+          vote_value: number
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          video_id: string
+          category_id: number
+          email: string
+          vote_value: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          video_id?: string
+          category_id?: number
+          email?: string
+          vote_value?: number
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_category_id_fkey"
+            columns: ["category_id"]
+            referencedRelation: "vote_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "votes_video_id_fkey"
+            columns: ["video_id"]
+            referencedRelation: "participations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       participations: {
         Row: {
           acceptation_reglement: boolean | null
