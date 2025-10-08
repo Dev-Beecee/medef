@@ -159,7 +159,8 @@ export default function AdminUsersPage() {
       : <Badge variant="secondary">Admin</Badge>;
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'short',
