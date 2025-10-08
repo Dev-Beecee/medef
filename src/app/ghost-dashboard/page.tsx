@@ -26,14 +26,14 @@ export default function GhostDashboard() {
 
         // Récupérer le nombre total de votes
         const { data: votes, error: errorVotes } = await supabase
-          .from('votes' as any)
+          .from('votes')
           .select('id')
 
         if (errorVotes) throw errorVotes
 
         // Récupérer les votes positifs avec les participations
         const { data: votesData, error: errorVotesData } = await supabase
-          .from('votes' as any)
+          .from('votes')
           .select('video_id')
           .eq('vote_value', 1)
 
@@ -55,7 +55,7 @@ export default function GhostDashboard() {
         // Compter les votes par vidéo
         const voteCounts: { [key: string]: { nom_etablissement: string; votes: number } } = {}
         
-        votesData?.forEach((vote: any) => {
+        votesData?.forEach((vote: { video_id: string }) => {
           const videoId = vote.video_id
           const nomEtablissement = participationsMap.get(videoId) || 'Inconnu'
           

@@ -109,7 +109,7 @@ export default function VoteConfirmationPage() {
               <Link href="/" className="flex-1">
                 <Button className="w-full">
                   <Home className="w-4 h-4 mr-2" />
-                  Retour à l'accueil
+                  Retour à l&apos;accueil
                 </Button>
               </Link>
             </div>

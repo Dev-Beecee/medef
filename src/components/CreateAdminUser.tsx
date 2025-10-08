@@ -58,8 +58,9 @@ const CreateAdminUser: React.FC<CreateAdminUserProps> = ({ onUserCreated }) => {
       // car l'API admin n'est pas accessible côté client
       
       // Vérifier si l'utilisateur existe déjà dans notre table admin_users
-      const { data: existingUser, error: checkError } = await supabase
-        .from('admin_users' as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: existingUser, error: checkError } = await (supabase as any)
+        .from('admin_users')
         .select('id')
         .eq('email', formData.email)
         .single();

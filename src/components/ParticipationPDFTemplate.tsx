@@ -225,16 +225,6 @@ export const ParticipationPDFTemplate: React.FC<ParticipationPDFTemplateProps> =
     return new Date(dateString).toLocaleDateString('fr-FR')
   }
 
-  const formatBoolean = (value: boolean | null) => {
-    if (value === null) return '-'
-    return value ? 'Oui' : 'Non'
-  }
-
-  const formatArray = (array: string[] | null) => {
-    if (!array || array.length === 0) return '-'
-    return array.join(', ')
-  }
-
   const getCategoryDisplayName = (category: string) => {
     // Si categoryNames est fourni et contient cette catégorie, utiliser le nom mappé
     if (categoryNames && categoryNames[category]) {
@@ -250,6 +240,7 @@ export const ParticipationPDFTemplate: React.FC<ParticipationPDFTemplateProps> =
         {/* Header avec image */}
         <View style={styles.header}>
           {headerImageBase64 && (
+            // eslint-disable-next-line jsx-a11y/alt-text
             <Image 
               style={styles.headerImage} 
               src={headerImageBase64}
@@ -352,7 +343,7 @@ export const ParticipationPDFTemplate: React.FC<ParticipationPDFTemplateProps> =
           </View>
           
           <View style={styles.fullWidth}>
-            <Text style={styles.label}>Description de l'activité:</Text>
+            <Text style={styles.label}>Description de l&apos;activité:</Text>
             <Text style={styles.valueFullWidth}>{participation.description_activite || '-'}</Text>
           </View>
           
@@ -418,11 +409,12 @@ export const ParticipationPDFTemplate: React.FC<ParticipationPDFTemplateProps> =
         </Text>
       </Page>
 
-      {/* Page 2: Pacte d'engagement */}
+      {/* Page 2: Pacte d&apos;engagement */}
       <Page size="A4" style={styles.page}>
         {/* Header avec image */}
         <View style={styles.header}>
           {headerImageBase64 && (
+            // eslint-disable-next-line jsx-a11y/alt-text
             <Image 
               style={styles.headerImage} 
               src={headerImageBase64}
@@ -432,17 +424,17 @@ export const ParticipationPDFTemplate: React.FC<ParticipationPDFTemplateProps> =
 
         {/* Header du pacte */}
         <View style={styles.engagementHeader}>
-          <Text style={styles.engagementTitle}>PACTE d'engagement</Text>
+          <Text style={styles.engagementTitle}>PACTE d&apos;engagement</Text>
           <Text style={styles.lead}>Les Trophées des administrations & entreprises inclusives de Martinique</Text>
         </View>
 
         {/* Section engagements */}
         <View style={styles.engagementSection}>
-          <Text style={styles.engagementSectionTitle}>L'entreprise s'engage à :</Text>
+          <Text style={styles.engagementSectionTitle}>L&apos;entreprise s&apos;engage à :</Text>
           <View style={styles.engagementList}>
             <Text style={styles.listItem}>• Organiser au moins une réunion par an de sensibilisation sur le handicap.</Text>
-            <Text style={styles.listItem}>• Désigner et former un référent handicap pour l'entreprise.</Text>
-            <Text style={styles.listItem}>• Participer au Duo Day. Publier ses offres d'emploi également sur le site de l'Agefiph.</Text>
+            <Text style={styles.listItem}>• Désigner et former un référent handicap pour l&apos;entreprise.</Text>
+            <Text style={styles.listItem}>• Participer au Duo Day. Publier ses offres d&apos;emploi également sur le site de l&apos;Agefiph.</Text>
             <Text style={styles.listItem}>• Communiquer sur le handicap auprès des collaborateurs.</Text>
             <Text style={styles.listItem}>• Intégrer le handicap dans sa politique de ressources humaines.</Text>
             <Text style={styles.listItem}>• Proposer des immersions professionnelles. Devenir activateur de progrès.</Text>
@@ -454,6 +446,7 @@ export const ParticipationPDFTemplate: React.FC<ParticipationPDFTemplateProps> =
           <Text style={styles.signatureLabel}>Signature :</Text>
           <View style={styles.signatureBox}>
             {signatureImageBase64 ? (
+              // eslint-disable-next-line jsx-a11y/alt-text
               <Image 
                 style={styles.signatureImage} 
                 src={signatureImageBase64}

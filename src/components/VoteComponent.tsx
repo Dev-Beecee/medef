@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -177,7 +177,7 @@ const VoteComponent: React.FC = () => {
     }
   };
 
-  const generateVoteSummary = () => {
+  const generateVoteSummary = useCallback(() => {
     const summary: VoteSummary[] = [];
     
     participations.forEach(participation => {
@@ -198,7 +198,7 @@ const VoteComponent: React.FC = () => {
     });
     
     setVoteSummary(summary);
-  };
+  }, [participations, currentVotes]);
 
   useEffect(() => {
     if (currentStep === 5) {

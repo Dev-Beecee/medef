@@ -75,7 +75,7 @@ export default function ClearDatabasePage() {
                 <p><strong>Recommandations :</strong></p>
                 <ul className="list-disc list-inside mt-1 space-y-1">
                   <li>Effectuez une sauvegarde avant toute opération</li>
-                  <li>Testez d'abord sur un environnement de développement</li>
+                  <li>Testez d&apos;abord sur un environnement de développement</li>
                   <li>Informez l&apos;équipe avant toute maintenance en production</li>
                   <li>Documentez les opérations effectuées</li>
                 </ul>

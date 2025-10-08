@@ -103,7 +103,7 @@ export default function ParticipationConfirmationPage() {
                   <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-blue-600 font-semibold text-xs">1</span>
                   </div>
-                  <p>Vous recevrez un email de confirmation à l'adresse <strong>{participationData.email}</strong></p>
+                  <p>Vous recevrez un email de confirmation à l&apos;adresse <strong>{participationData.email}</strong></p>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -124,10 +124,10 @@ export default function ParticipationConfirmationPage() {
             <div className="bg-gray-50 rounded-lg p-4">
               <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                 <Mail className="w-5 h-5" />
-                Besoin d'aide ?
+                Besoin d&apos;aide ?
               </h3>
               <p className="text-sm text-gray-600">
-                Si vous avez des questions concernant votre participation, n'hésitez pas à nous contacter.
+                Si vous avez des questions concernant votre participation, n&apos;hésitez pas à nous contacter.
               </p>
             </div>
 
@@ -135,7 +135,7 @@ export default function ParticipationConfirmationPage() {
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <Button asChild className="flex-1">
                 <Link href="/">
-                  Retour à l'accueil
+                  Retour à l&apos;accueil
                 </Link>
               </Button>
               <Button variant="outline" asChild className="flex-1">
