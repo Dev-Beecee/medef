@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          id: number
+          email: string
+          role: string
+          is_active: boolean | null
+          created_at: string | null
+          last_login: string | null
+          auth_user_id: string | null
+        }
+        Insert: {
+          id?: number
+          email: string
+          role?: string
+          is_active?: boolean | null
+          created_at?: string | null
+          last_login?: string | null
+          auth_user_id?: string | null
+        }
+        Update: {
+          id?: number
+          email?: string
+          role?: string
+          is_active?: boolean | null
+          created_at?: string | null
+          last_login?: string | null
+          auth_user_id?: string | null
+        }
+        Relationships: []
+      }
       date_participation: {
         Row: {
           actif: boolean | null
