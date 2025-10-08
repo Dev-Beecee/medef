@@ -19,18 +19,18 @@ type DateParticipation = {
   id: string
   date_debut: string
   date_fin: string
-  actif: boolean
-  created_at: string
-  updated_at: string
+  actif: boolean | null
+  created_at: string | null
+  updated_at: string | null
 }
 
 type DateVote = {
   id: string
   date_debut: string
   date_fin: string
-  actif: boolean
-  created_at: string
-  updated_at: string
+  actif: boolean | null
+  created_at: string | null
+  updated_at: string | null
 }
 
 export default function DatesPage() {
@@ -158,10 +158,12 @@ export default function DatesPage() {
     }
   }
 
-  const toggleActif = async (table: 'date_participation' | 'date_vote', id: string, currentActif: boolean) => {
+  const toggleActif = async (table: 'date_participation' | 'date_vote', id: string, currentActif: boolean | null) => {
     try {
+      const newActif = !currentActif; // null or false becomes true, true becomes false
+      
       // Si on active cette période, désactiver toutes les autres de la même table
-      if (!currentActif) {
+      if (newActif) {
         const { error: updateError } = await supabase
           .from(table)
           .update({ actif: false })
@@ -173,13 +175,13 @@ export default function DatesPage() {
 
       const { error } = await supabase
         .from(table)
-        .update({ actif: !currentActif, updated_at: new Date().toISOString() })
+        .update({ actif: newActif, updated_at: new Date().toISOString() })
         .eq('id', id)
 
       if (error) throw error
 
-      toast.success(`Période ${!currentActif ? 'activée' : 'désactivée'}`, {
-        description: !currentActif ? 'Les autres périodes ont été désactivées' : undefined
+      toast.success(`Période ${newActif ? 'activée' : 'désactivée'}`, {
+        description: newActif ? 'Les autres périodes ont été désactivées' : undefined
       })
       fetchDates()
     } catch (error) {
@@ -279,12 +281,12 @@ export default function DatesPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Avertissement si plusieurs périodes actives */}
-          {datesParticipation.filter(p => p.actif).length > 1 && (
+          {datesParticipation.filter(p => !!p.actif).length > 1 && (
             <div className="flex items-start gap-3 p-4 border border-yellow-500 bg-yellow-50 rounded-lg">
               <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-yellow-800">
-                  ⚠️ Attention : {datesParticipation.filter(p => p.actif).length} périodes sont actives simultanément
+                  ⚠️ Attention : {datesParticipation.filter(p => !!p.actif).length} périodes sont actives simultanément
                 </p>
                 <p className="text-xs text-yellow-700 mt-1">
                   Il est recommandé de n&apos;avoir qu&apos;une seule période active à la fois. 
@@ -373,12 +375,12 @@ export default function DatesPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Avertissement si plusieurs périodes actives */}
-          {datesVote.filter(p => p.actif).length > 1 && (
+          {datesVote.filter(p => !!p.actif).length > 1 && (
             <div className="flex items-start gap-3 p-4 border border-yellow-500 bg-yellow-50 rounded-lg">
               <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-yellow-800">
-                  ⚠️ Attention : {datesVote.filter(p => p.actif).length} périodes sont actives simultanément
+                  ⚠️ Attention : {datesVote.filter(p => !!p.actif).length} périodes sont actives simultanément
                 </p>
                 <p className="text-xs text-yellow-700 mt-1">
                   Il est recommandé de n&apos;avoir qu&apos;une seule période active à la fois. 
@@ -478,7 +480,7 @@ function PeriodCard({
   const now = new Date()
   const debut = new Date(periode.date_debut)
   const fin = new Date(periode.date_fin)
-  const isActive = periode.actif && now >= debut && now <= fin
+  const isActive = !!periode.actif && now >= debut && now <= fin
   const isPast = now > fin
   const isFuture = now < debut
 
@@ -527,7 +529,7 @@ function PeriodCard({
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">Actif</span>
-            <Switch checked={periode.actif} onCheckedChange={onToggleActif} />
+            <Switch checked={!!periode.actif} onCheckedChange={onToggleActif} />
           </div>
         </div>
       </div>
