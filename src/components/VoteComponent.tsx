@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useEmailCheck } from '@/hooks/useEmailCheck';
 import StepIndicator from './StepIndicator';
@@ -19,6 +18,8 @@ interface Participation {
   video_s3_url: string;
   categories_selectionnees: string[];
   statut: string;
+  activite_principale: string;
+  inclusion_handicap_approche: string;
 }
 
 interface Category {
@@ -90,18 +91,21 @@ const VoteComponent: React.FC = () => {
   };
 
   const handleVote = (participationId: string, categoryId: number, voteValue: number) => {
-    const existingVoteIndex = currentVotes.findIndex(
-      vote => vote.participationId === participationId && vote.categoryId === categoryId
+    // Supprimer tous les votes existants pour cette catégorie
+    // Garder les votes des autres catégories
+    const votesForOtherCategories = currentVotes.filter(
+      vote => vote.categoryId !== categoryId
     );
-
-    if (existingVoteIndex >= 0) {
-      // Mettre à jour le vote existant
-      const updatedVotes = [...currentVotes];
-      updatedVotes[existingVoteIndex].voteValue = voteValue;
-      setCurrentVotes(updatedVotes);
+    
+    if (voteValue === 1) {
+      // Ajouter le nouveau vote
+      setCurrentVotes([
+        ...votesForOtherCategories,
+        { participationId, categoryId, voteValue: 1 }
+      ]);
     } else {
-      // Ajouter un nouveau vote
-      setCurrentVotes([...currentVotes, { participationId, categoryId, voteValue }]);
+      // Si on désélectionne, garder seulement les votes des autres catégories
+      setCurrentVotes(votesForOtherCategories);
     }
   };
 
@@ -220,8 +224,8 @@ const VoteComponent: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">{category.name}</h2>
-          <p className="text-gray-600">{category.description}</p>
+          <h2 className="text-2xl font-bold mb-2 text-left" style={{ color: '#dbb572' }}>Catégorie : {category.name}</h2>
+          <p className="text-white text-left">{category.description}</p>
         </div>
 
         <VideoGrid
@@ -237,8 +241,8 @@ const VoteComponent: React.FC = () => {
   const renderValidationStep = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">Récapitulatif des votes</h2>
-        <p className="text-gray-600">Vérifiez vos votes avant de les soumettre</p>
+        <h2 className="text-2xl font-bold mb-2 text-left" style={{ color: '#dbb572' }}>Récapitulatif des votes</h2>
+        <p className="text-white text-left">Vérifiez vos votes avant de les soumettre</p>
       </div>
 
       <VoteSummary 
@@ -259,7 +263,7 @@ const VoteComponent: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto"></div>
           <p className="mt-4 text-gray-600">Chargement des candidatures...</p>
         </div>
       </div>
@@ -280,23 +284,45 @@ const VoteComponent: React.FC = () => {
           onClick={handlePrevious}
           disabled={currentStep === 1}
           variant="outline"
+          style={{
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 255, 255, 0.19)',
+            background: 'rgba(255, 255, 255, 0.16)',
+            backdropFilter: 'blur(40px)',
+            color: 'white'
+          }}
         >
-          <ChevronLeft size={20} className="mr-2" />
+          <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+            <mask id="mask0_132_61537" style={{maskType:"alpha"}} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+              <rect width="24" height="24" transform="matrix(-1 0 0 1 24.5 0)" fill="#D9D9D9"/>
+            </mask>
+            <g mask="url(#mask0_132_61537)">
+              <path d="M12.5 21C13.75 21 14.9208 20.7625 16.0125 20.2875C17.1042 19.8125 18.0542 19.1708 18.8625 18.3625C19.6708 17.5542 20.3125 16.6042 20.7875 15.5125C21.2625 14.4208 21.5 13.25 21.5 12C21.5 10.75 21.2625 9.57917 20.7875 8.4875C20.3125 7.39583 19.6708 6.44583 18.8625 5.6375C18.0542 4.82917 17.1042 4.1875 16.0125 3.7125C14.9208 3.2375 13.75 3 12.5 3V5C14.45 5 16.1042 5.67917 17.4625 7.0375C18.8208 8.39583 19.5 10.05 19.5 12C19.5 13.95 18.8208 15.6042 17.4625 16.9625C16.1042 18.3208 14.45 19 12.5 19V21ZM8.5 17L9.9 15.575L7.325 13H15.5V11H7.325L9.9 8.4L8.5 7L3.5 12L8.5 17Z" fill="white"/>
+            </g>
+          </svg>
           Précédent
         </Button>
 
-        {currentStep < 5 ? (
-          <Button onClick={handleNext}>
-            Suivant
-            <ChevronRight size={20} className="ml-2" />
-          </Button>
-        ) : (
+        {currentStep < 5 && (
           <Button 
-            onClick={submitVotes} 
-            disabled={voteSummary.length === 0}
-            className="bg-green-600 hover:bg-green-700"
+            onClick={handleNext}
+            style={{
+              borderRadius: '10px',
+              border: '1px solid #EBE7E1',
+              background: '#DBB572',
+              backdropFilter: 'blur(40px)',
+              color: '#10214b'
+            }}
           >
-            Soumettre les votes
+            Suivant
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-2">
+              <mask id="mask0_288_10446" style={{maskType:"alpha"}} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                <rect width="24" height="24" fill="#D9D9D9"/>
+              </mask>
+              <g mask="url(#mask0_288_10446)">
+                <path d="M12 21C10.75 21 9.57917 20.7625 8.4875 20.2875C7.39583 19.8125 6.44583 19.1708 5.6375 18.3625C4.82917 17.5542 4.1875 16.6042 3.7125 15.5125C3.2375 14.4208 3 13.25 3 12C3 10.75 3.2375 9.57917 3.7125 8.4875C4.1875 7.39583 4.82917 6.44583 5.6375 5.6375C6.44583 4.82917 7.39583 4.1875 8.4875 3.7125C9.57917 3.2375 10.75 3 12 3V5C10.05 5 8.39583 5.67917 7.0375 7.0375C5.67917 8.39583 5 10.05 5 12C5 13.95 5.67917 15.6042 7.0375 16.9625C8.39583 18.3208 10.05 19 12 19V21ZM16 17L14.6 15.575L17.175 13H9V11H17.175L14.6 8.4L16 7L21 12L16 17Z" fill="#10214B"/>
+              </g>
+            </svg>
           </Button>
         )}
       </div>

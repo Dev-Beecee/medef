@@ -45,8 +45,14 @@ const VoteSummaryComponent: React.FC<VoteSummaryProps> = ({ voteSummary, categor
   return (
     <div className="space-y-4">
       {voteSummary.map(({ participation, votes }) => (
-        <Card key={participation.id}>
-          <CardContent className="p-4">
+        <Card 
+          key={participation.id}
+          style={{
+            background: 'rgb(30, 46, 86)',
+            border: '1px solid rgb(219, 181, 114)'
+          }}
+        >
+          <CardContent className="p-4" style={{ color: 'white' }}>
             <div className="flex items-start gap-4">
               <div className="w-20 h-20 bg-gray-200 rounded flex-shrink-0">
                 {participation.video_s3_url ? (
@@ -63,8 +69,8 @@ const VoteSummaryComponent: React.FC<VoteSummaryProps> = ({ voteSummary, categor
                 )}
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold mb-2">{participation.nom_etablissement}</h3>
-                <p className="text-sm text-gray-600 mb-3">
+                <h3 className="font-semibold mb-2" style={{ color: 'white' }}>{participation.nom_etablissement}</h3>
+                <p className="text-sm mb-3" style={{ color: 'white' }}>
                   <strong>Candidat :</strong> {participation.prenom_candidat} {participation.nom_candidat}
                 </p>
                 <div className="space-y-1">
@@ -76,11 +82,11 @@ const VoteSummaryComponent: React.FC<VoteSummaryProps> = ({ voteSummary, categor
                         <div className="flex items-center gap-1">
                           {voteValue === 1 ? (
                             <>
-                              <CheckCircle size={16} className="text-green-500" />
-                              <span className="text-sm text-green-600 font-medium">Je vote</span>
+                              <CheckCircle size={16} style={{ color: '#dbb572' }} />
+                              <span className="text-sm font-medium" style={{ color: '#dbb572' }}>Je vote</span>
                             </>
                           ) : (
-                            <span className="text-sm text-gray-500 font-medium">Pas de vote</span>
+                            <span className="text-sm text-gray-300 font-medium">Pas de vote</span>
                           )}
                         </div>
                       </div>

@@ -2,9 +2,10 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, ArrowLeft, Home } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import Hero from '@/components/Hero';
 import Link from 'next/link';
 
 interface VoteConfirmationData {
@@ -44,7 +45,7 @@ function VoteConfirmationContent() {
 
   if (!confirmationData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#10214B' }}>
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
             <h1 className="text-xl font-bold text-red-600 mb-4">Erreur</h1>
@@ -62,69 +63,37 @@ function VoteConfirmationContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <Card className="shadow-lg">
-          <CardHeader className="text-center bg-green-50 border-b">
-            <div className="flex justify-center mb-4">
-              <CheckCircle className="w-16 h-16 text-green-500" />
-            </div>
-            <CardTitle className="text-2xl text-green-700">
-              Vote enregistré avec succès !
-            </CardTitle>
-            <p className="text-gray-600 mt-2">
-              Merci pour votre participation au concours
-            </p>
-          </CardHeader>
-          
-          <CardContent className="p-6 space-y-6">
-            {/* Résumé du vote */}
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-blue-800 mb-2">Résumé de votre vote</h3>
-              <div className="space-y-2 text-sm">
-                <p><span className="font-medium">Email :</span> {confirmationData.email}</p>
-                <p><span className="font-medium">Nombre de votes :</span> {confirmationData.totalVotes}</p>
-                <p><span className="font-medium">Candidatures soutenues :</span> {confirmationData.votedParticipations.length}</p>
-              </div>
-            </div>
-
-            {/* Message de confirmation */}
-            <div className="text-center space-y-4">
-              <p className="text-gray-700">
-                Votre vote a été enregistré avec succès. Vous avez soutenu <strong>{confirmationData.totalVotes}</strong> candidature(s).
-              </p>
-              <p className="text-sm text-gray-600">
-                Les résultats seront communiqués après la clôture du vote.
-              </p>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/vote" className="flex-1">
-                <Button variant="outline" className="w-full">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Voir les statistiques
-                </Button>
-              </Link>
-              <Link href="/" className="flex-1">
-                <Button className="w-full">
-                  <Home className="w-4 h-4 mr-2" />
-                  Retour à l&apos;accueil
-                </Button>
-              </Link>
-            </div>
-
-            {/* Note importante */}
-            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                <strong>Note :</strong> Chaque adresse email ne peut voter qu&apos;une seule fois. 
-                Votre vote est définitif et ne peut être modifié.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+    <>
+      <Hero />
+      <div className="py-12 px-4 bg-[#10214B] bg-[url(/seeph-bg_confirmationvote.png)] bg-[50%_100%] bg-[50%] bg-no-repeat min-h-[500px] md:bg-[50%_100%] md:bg-[50%] [background-position:50%_80%] [background-size:100%] md:[background-position:50%_100%] md:[background-size:50%]" style={{ 
+        backgroundColor: '#10214B',
+         backgroundImage: 'url(/seeph-bg_confirmationvote.png)',
+          backgroundPosition: '50% 80%',
+          backgroundSize: '100%',
+          backgroundRepeat: 'no-repeat',
+          minHeight: '500px'
+        }}>
+      <div className="max-w-4xl mx-auto">
+       <h2 className="text-2xl font-bold mb-2 text-center uppercase mt-24" style={{ color: '#dbb572' }}>
+       Votre vote a bien été enregistré !
+       </h2>
+         <div className="w-max mx-auto uppercase mt-24 text-[15px] md:text-[40px]" style={{ 
+          color: '#10214B', 
+          textAlign: 'center', 
+          fontFamily: 'Poppins', 
+          fontStyle: 'normal', 
+          fontWeight: 700,
+          backgroundColor: '#dbb572',
+          padding: '10px 20px',
+          borderRadius: '10px'
+        }}>
+         <h3>
+         Merci pour votre participation
+         </h3>
+        </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

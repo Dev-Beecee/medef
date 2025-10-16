@@ -14,6 +14,8 @@ interface Participation {
   video_s3_url: string;
   categories_selectionnees: string[];
   statut: string;
+  activite_principale: string;
+  inclusion_handicap_approche: string;
 }
 
 interface VideoCardProps {
@@ -24,10 +26,12 @@ interface VideoCardProps {
 }
 
 const VideoCard: React.FC<VideoCardProps> = ({ participation, categoryId, currentVote, onVote }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const renderRadioButtons = () => {
     return (
       <div className="flex gap-4">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 mx-auto">
           <input
             type="checkbox"
             id={`${participation.id}-${categoryId}-vote`}
@@ -35,8 +39,8 @@ const VideoCard: React.FC<VideoCardProps> = ({ participation, categoryId, curren
             onChange={() => onVote(participation.id, categoryId, currentVote === 1 ? -1 : 1)}
             className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
           />
-          <Label htmlFor={`${participation.id}-${categoryId}-vote`} className="text-green-600 font-medium">
-            Je vote
+          <Label htmlFor={`${participation.id}-${categoryId}-vote`} className="text-white font-medium">
+            {currentVote === 1 ? 'Vote sélectionné' : 'Sélectionner cette vidéo'}
           </Label>
         </div>
       </div>
@@ -44,7 +48,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ participation, categoryId, curren
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow" style={{ padding: 0, background: '#1e2e56' }}>
       <CardHeader className="p-0">
         <div className="relative aspect-video bg-gray-200">
           {participation.video_s3_url ? (
@@ -61,15 +65,44 @@ const VideoCard: React.FC<VideoCardProps> = ({ participation, categoryId, curren
           )}
         </div>
       </CardHeader>
-      <CardContent className="p-4">
-        <CardTitle className="text-lg mb-2 line-clamp-2">
+      <CardContent className="p-4" style={{ paddingTop: 0 }}>
+        <CardTitle className="text-lg mb-2 line-clamp-2" style={{ color: '#dbb572' }}>
           {participation.nom_etablissement}
         </CardTitle>
-        <p className="text-sm text-gray-600 mb-2">
-          <strong>Candidat :</strong> {participation.prenom_candidat} {participation.nom_candidat}
-        </p>
+        <div>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-sm text-white mb-2 hover:text-gray-300 transition-colors"
+          style={{
+            borderRadius: '10px',
+            border: '1px solid rgba(255, 255, 255, 0.19)',
+            background: 'rgba(255, 255, 255, 0.16)',
+            backdropFilter: 'blur(40px)',
+            padding: '8px 12px',
+            color: 'white'
+          }}
+        >
+          {isExpanded ? 'Masquer les détails' : 'Voir l\'approche de l\'inclusion handicap et l\'activité principale'}
+        </button>
+        
+        {isExpanded && (
+          <div className="space-y-2">
+            <p className="text-sm text-white mb-2">
+              <strong>Approche inclusion handicap :</strong> 
+            </p>
+            <p className="text-sm text-white mb-2">
+              {participation.inclusion_handicap_approche}
+            </p>
+            <p className="text-sm text-white mb-2">
+              <strong>Activité principale :</strong> 
+            </p>
+            <p className="text-sm text-white mb-2">
+              {participation.activite_principale}
+            </p>      
+          </div>
+        )}
+        </div>
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Votez pour cette candidature :</Label>
           {renderRadioButtons()}
         </div>
       </CardContent>
@@ -136,7 +169,16 @@ const VideoGrid: React.FC<VideoGridProps> = ({
 
       {hasMoreParticipations && (
         <div className="text-center">
-          <Button onClick={loadMoreParticipations} variant="outline">
+          <Button 
+            onClick={loadMoreParticipations} 
+            variant="outline"
+            style={{
+              borderRadius: '10px',
+              border: '1px solid #EBE7E1',
+              background: '#DBB572',
+              backdropFilter: 'blur(40px)'
+            }}
+          >
             Voir plus de candidatures ({participations.length - displayedParticipations} restantes)
           </Button>
         </div>

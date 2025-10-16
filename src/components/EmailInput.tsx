@@ -4,8 +4,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, CheckCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { CheckCircle } from 'lucide-react';
 
 interface EmailInputProps {
   email: string;
@@ -21,19 +21,24 @@ const EmailInput: React.FC<EmailInputProps> = ({
   onSubmit
 }) => {
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-lg text-white mb-4">Pour valider vos votes, merci de saisir votre adresse email.</h2>
+      </div>
+      
+      <Card 
+        className="w-full max-w-md mx-auto"
+        style={{
+          background: 'rgb(30, 46, 86)',
+          border: '1px solid rgb(219, 181, 114)'
+        }}
+      >
       <CardHeader className="text-center">
-        <div className="flex justify-center mb-4">
-          <Mail className="w-12 h-12 text-blue-600" />
-        </div>
-        <CardTitle className="text-xl">Confirmer votre vote</CardTitle>
-        <p className="text-gray-600 text-sm">
-          Saisissez votre adresse email pour finaliser votre vote
-        </p>
+       <h3 className="text-2xl font-bold mb-2 text-left" style={{ color: '#dbb572' }}>Confirmer votre vote</h3>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" style={{ color: 'white' }}>
         <div className="space-y-2">
-          <Label htmlFor="email">Adresse email</Label>
+          <Label htmlFor="email" style={{ color: 'white' }}>Adresse email</Label>
           <Input
             id="email"
             type="email"
@@ -45,12 +50,12 @@ const EmailInput: React.FC<EmailInputProps> = ({
           />
         </div>
         
-        <div className="bg-blue-50 p-3 rounded-lg">
+        <div className="p-3 rounded-lg" style={{ background: 'rgba(219, 181, 114, 0.1)', border: '1px solid rgba(219, 181, 114, 0.3)' }}>
           <div className="flex items-start gap-2">
-            <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-blue-800">
+            <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: '#dbb572' }} />
+            <div className="text-sm" style={{ color: 'white' }}>
               <p className="font-medium">Votre vote est sécurisé</p>
-              <p className="text-blue-600">
+              <p style={{ color: '#dbb572' }}>
                 Chaque adresse email ne peut voter qu&apos;une seule fois
               </p>
             </div>
@@ -61,10 +66,17 @@ const EmailInput: React.FC<EmailInputProps> = ({
           onClick={onSubmit}
           disabled={!email || isLoading}
           className="w-full"
+          style={{
+            borderRadius: '10px',
+            border: '1px solid #EBE7E1',
+            background: '#DBB572',
+            backdropFilter: 'blur(40px)',
+            color: '#10214b'
+          }}
         >
           {isLoading ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 mr-2" style={{ borderColor: '#10214b' }}></div>
               Vérification...
             </>
           ) : (
@@ -73,6 +85,7 @@ const EmailInput: React.FC<EmailInputProps> = ({
         </Button>
       </CardContent>
     </Card>
+    </div>
   );
 };
 
