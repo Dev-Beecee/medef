@@ -29,7 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Eye, Loader2, Search, Filter, Download, FileText, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Eye, Loader2, Search, Filter, Download, FileText, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { exportParticipationsToPDF, exportSingleParticipationToPDF } from '@/lib/pdfExport'
 import { ExportProgressDialog } from '@/components/ExportProgressDialog'
 
@@ -111,6 +111,10 @@ export default function ParticipationsPage() {
   // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
+  
+  // États pour le tri
+  const [sortField, setSortField] = useState<string | null>(null)
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   useEffect(() => {
     fetchParticipations()
@@ -118,6 +122,25 @@ export default function ParticipationsPage() {
 
   const getCategoryDisplayName = (categoryId: string) => {
     return categoryNames[categoryId] || categoryId
+  }
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      // Si on clique sur la même colonne, inverser la direction
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      // Nouvelle colonne, commencer par ascendant
+      setSortField(field)
+      setSortDirection('asc')
+    }
+    setCurrentPage(1) // Retourner à la première page
+  }
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-4 w-4" />
+    }
+    return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
   }
 
   const fetchParticipations = async () => {
@@ -329,8 +352,8 @@ export default function ParticipationsPage() {
     }
   }
 
-  // Filtrer les participations
-  const filteredParticipations = participations.filter((participation) => {
+  // Filtrer et trier les participations
+  let filteredParticipations = participations.filter((participation) => {
     // Filtre par statut
     const matchesStatut = filterStatut === 'all' || participation.statut === filterStatut
 
@@ -346,6 +369,28 @@ export default function ParticipationsPage() {
 
     return matchesStatut && matchesSearch
   })
+
+  // Appliquer le tri si un champ de tri est sélectionné
+  if (sortField) {
+    filteredParticipations = [...filteredParticipations].sort((a, b) => {
+      let aValue = a[sortField as keyof Participation]
+      let bValue = b[sortField as keyof Participation]
+
+      // Gérer les valeurs nulles/undefined
+      if (aValue === null || aValue === undefined) aValue = ''
+      if (bValue === null || bValue === undefined) bValue = ''
+
+      // Convertir en string pour la comparaison
+      const aStr = String(aValue).toLowerCase()
+      const bStr = String(bValue).toLowerCase()
+
+      if (sortDirection === 'asc') {
+        return aStr.localeCompare(bStr, 'fr', { numeric: true })
+      } else {
+        return bStr.localeCompare(aStr, 'fr', { numeric: true })
+      }
+    })
+  }
 
   // Calculs de pagination
   const totalPages = Math.ceil(filteredParticipations.length / itemsPerPage)
@@ -475,14 +520,78 @@ export default function ParticipationsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Établissement</TableHead>
-              <TableHead>Candidat</TableHead>
-              <TableHead>Qualité</TableHead>
-              <TableHead>Structure</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Téléphone</TableHead>
-              <TableHead>Date d'enregistrement</TableHead>
-              <TableHead>Statut</TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort('nom_etablissement')}
+              >
+                <div className="flex items-center gap-2">
+                  Établissement
+                  {getSortIcon('nom_etablissement')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort('nom_candidat')}
+              >
+                <div className="flex items-center gap-2">
+                  Candidat
+                  {getSortIcon('nom_candidat')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort('qualite_agissant')}
+              >
+                <div className="flex items-center gap-2">
+                  Qualité
+                  {getSortIcon('qualite_agissant')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort('nom_structure')}
+              >
+                <div className="flex items-center gap-2">
+                  Structure
+                  {getSortIcon('nom_structure')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort('email')}
+              >
+                <div className="flex items-center gap-2">
+                  Email
+                  {getSortIcon('email')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort('telephone')}
+              >
+                <div className="flex items-center gap-2">
+                  Téléphone
+                  {getSortIcon('telephone')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort('created_at')}
+              >
+                <div className="flex items-center gap-2">
+                  Date d'enregistrement
+                  {getSortIcon('created_at')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort('statut')}
+              >
+                <div className="flex items-center gap-2">
+                  Statut
+                  {getSortIcon('statut')}
+                </div>
+              </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
