@@ -1,0 +1,15 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /ghost
+Disallow: /ghost-dashboard
+Disallow: /ghost-dashboard/*
+Disallow: /participation-confirmation
+Disallow: /vote-confirmation
+Disallow: /api/*
+
+# Host
+Host: https://seeph-medef-martinique.fr
+
+# Sitemaps
+Sitemap: https://seeph-medef-martinique.fr/sitemap.xml
