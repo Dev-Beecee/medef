@@ -14,6 +14,7 @@ import {
   Medal,
   Award,
   ChevronLeft,
+  ChevronRight,
   Play
 } from 'lucide-react';
 import Link from 'next/link';
@@ -50,6 +51,10 @@ export default function GhostStatsPage() {
     totalVoters: 0,
     totalParticipations: 0
   });
+  
+  // États pour la pagination du classement
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchStats();
@@ -188,6 +193,12 @@ export default function GhostStatsPage() {
       default: return <span className="w-6 h-6 text-gray-500 font-bold">{rank}</span>;
     }
   };
+
+  // Calculs de pagination pour le classement
+  const totalPages = Math.ceil(videoStats.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedVideoStats = videoStats.slice(startIndex, endIndex);
 
   if (isLoading) {
     return (
@@ -373,10 +384,10 @@ export default function GhostStatsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {videoStats.map((video, index) => (
+              {paginatedVideoStats.map((video, index) => (
                 <div key={video.participationId} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50">
                   <div className="flex-shrink-0 w-8 text-center">
-                    <span className="font-bold text-gray-500">#{index + 1}</span>
+                    <span className="font-bold text-gray-500">#{startIndex + index + 1}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-gray-900 truncate">
@@ -385,7 +396,7 @@ export default function GhostStatsPage() {
                     <p className="text-sm text-gray-600 truncate">
                       {video.nomCandidat}
                     </p>
-                    <div className="flex gap-1 mt-1">
+                    <div className="flex flex-wrap gap-1 mt-1">
                       {video.categories.map((category, catIndex) => (
                         <Badge key={catIndex} variant="secondary" className="text-xs">
                           {category}
@@ -437,6 +448,64 @@ export default function GhostStatsPage() {
                 </div>
               ))}
             </div>
+            
+            {/* Contrôles de pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                <div className="text-sm text-gray-600">
+                  Affichage de {startIndex + 1} à {Math.min(endIndex, videoStats.length)} sur {videoStats.length} candidatures
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Précédent
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNumber
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1
+                      } else if (currentPage <= 3) {
+                        pageNumber = i + 1
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + i
+                      } else {
+                        pageNumber = currentPage - 2 + i
+                      }
+                      
+                      return (
+                        <Button
+                          key={pageNumber}
+                          variant={currentPage === pageNumber ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(pageNumber)}
+                          className="w-8 h-8 p-0"
+                        >
+                          {pageNumber}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Suivant
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
