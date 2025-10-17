@@ -30,6 +30,7 @@ export default function FormulaireParticipation() {
   const [loading, setLoading] = useState(false)
   const [participationId, setParticipationId] = useState<string | null>(null)
   const [isPacteDialogOpen, setIsPacteDialogOpen] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const signatureRef = useRef<SignatureCanvas>(null)
   
   // React Hook Form - Utiliser watch uniquement pour les champs spécifiques
@@ -43,6 +44,110 @@ export default function FormulaireParticipation() {
 
   // Surveiller uniquement le champ categories_selectionnees pour l'étape 3
   const categoriesSelectionnees = watch('categories_selectionnees')
+  
+  // Fonction pour scroller vers un élément en erreur
+  const scrollToError = (fieldName: string) => {
+    const element = document.querySelector(`[name="${fieldName}"]`) || 
+                   document.querySelector(`[data-field="${fieldName}"]`)
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      })
+      // Focus sur l'élément si c'est un input
+      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+        element.focus()
+      }
+    }
+  }
+
+  // Fonction pour valider un champ spécifique
+  const validateField = (fieldName: string, value: any): string => {
+    switch (fieldName) {
+      case 'nom_etablissement':
+        return !value || value.trim() === '' ? 'Le nom de l\'établissement est obligatoire' : ''
+      case 'nom_candidat':
+        return !value || value.trim() === '' ? 'Le nom du candidat est obligatoire' : ''
+      case 'prenom_candidat':
+        return !value || value.trim() === '' ? 'Le prénom du candidat est obligatoire' : ''
+      case 'qualite_agissant':
+        return !value || value.trim() === '' ? 'La qualité d\'agissant est obligatoire' : ''
+      case 'nom_structure':
+        return !value || value.trim() === '' ? 'Le nom de la structure est obligatoire' : ''
+      case 'email':
+        if (!value || value.trim() === '') return 'L\'adresse email est obligatoire'
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        return !emailRegex.test(value) ? 'Veuillez saisir une adresse email valide' : ''
+      case 'siret':
+        return !value || value.trim() === '' ? 'Le numéro SIRET est obligatoire' : ''
+      case 'naf':
+        return !value || value.trim() === '' ? 'Le code NAF est obligatoire' : ''
+      case 'consentement_candidature':
+        return !value ? 'Vous devez accepter les conditions de candidature' : ''
+      case 'denomination_commerciale':
+        return !value || value.trim() === '' ? 'La dénomination commerciale est obligatoire' : ''
+      case 'adresse_siege_social':
+        return !value || value.trim() === '' ? 'L\'adresse du siège social est obligatoire' : ''
+      case 'telephone':
+        return !value || value.trim() === '' ? 'Le numéro de téléphone est obligatoire' : ''
+      case 'date_creation':
+        return !value ? 'La date de création est obligatoire' : ''
+      case 'forme_juridique':
+        return !value || value.trim() === '' ? 'La forme juridique est obligatoire' : ''
+      case 'capital_social':
+        return !value ? 'Le capital social est obligatoire' : ''
+      case 'effectif_2023':
+        return !value ? 'L\'effectif au 30 septembre 2023 est obligatoire' : ''
+      case 'activite_principale':
+        return !value || value.trim() === '' ? 'L\'activité principale est obligatoire' : ''
+      case 'description_activite':
+        return !value || value.trim() === '' ? 'La description de l\'activité est obligatoire' : ''
+      case 'description_clientele':
+        return !value || value.trim() === '' ? 'La description de la clientèle est obligatoire' : ''
+      case 'description_produits_services':
+        return !value || value.trim() === '' ? 'La description des produits et services est obligatoire' : ''
+      case 'modes_communication':
+        return !value || value.trim() === '' ? 'Les modes de communication sont obligatoires' : ''
+      case 'support_martinique':
+        return !value || value.trim() === '' ? 'Le soutien à la Martinique est obligatoire' : ''
+      case 'points_forts':
+        return !value || value.trim() === '' ? 'Les points forts sont obligatoires' : ''
+      case 'points_faibles':
+        return !value || value.trim() === '' ? 'Les points faibles et axes d\'amélioration sont obligatoires' : ''
+      case 'demarche_transition_numerique':
+        return !value || value.trim() === '' ? 'La démarche de transition numérique est obligatoire' : ''
+      case 'inclusion_handicap_approche':
+        return !value || value.trim() === '' ? 'L\'approche de l\'inclusion des personnes en situation de handicap est obligatoire' : ''
+      case 'inclusion_handicap_besoins':
+        return !value || value.trim() === '' ? 'Les besoins spécifiques pour l\'inclusion handicap sont obligatoires' : ''
+      case 'pourcentage_travailleurs_handicap':
+        return !value || value.trim() === '' ? 'Le pourcentage de travailleurs en situation de handicap est obligatoire' : ''
+      case 'embauche_accompagnement_handicap':
+        return !value || value.trim() === '' ? 'L\'accompagnement à l\'embauche de personnes en situation de handicap est obligatoire' : ''
+      case 'collaboration_entreprises_adaptees':
+        return !value || value.trim() === '' ? 'La collaboration avec des entreprises adaptées est obligatoire' : ''
+      case 'raison_participation':
+        return !value || value.trim() === '' ? 'La raison de votre participation est obligatoire' : ''
+      case 'axes_progres':
+        return !value || value.trim() === '' ? 'Les axes de progrès souhaités sont obligatoires' : ''
+      case 'attestation_regularite_s3_url':
+        return !value ? 'L\'attestation de régularité fiscale et sociale est obligatoire' : ''
+      case 'fiche_insee_kbis_s3_url':
+        return !value ? 'L\'extrait KBIS est obligatoire' : ''
+      case 'categories_selectionnees':
+        return !value || value.length === 0 ? 'Vous devez sélectionner au moins une catégorie' : ''
+      case 'video_s3_url':
+        return !value ? 'Vous devez télécharger une vidéo de présentation' : ''
+      case 'autorisation_diffusion_video':
+        return !value ? 'Vous devez autoriser la diffusion de la vidéo' : ''
+      case 'acceptation_reglement':
+        return !value ? 'Vous devez accepter le règlement' : ''
+      case 'signature_image_s3_url':
+        return !value ? 'Vous devez signer le formulaire' : ''
+      default:
+        return ''
+    }
+  }
 
   const saveParticipation = async (data: Partial<ParticipationData>) => {
     try {
@@ -84,37 +189,84 @@ export default function FormulaireParticipation() {
     }
   }
 
-  const validateEtape = (etape: number): boolean => {
+  const validateEtape = (etape: number): { isValid: boolean; firstErrorField?: string } => {
     const values = getValues()
+    const errors: Record<string, string> = {}
+    let firstErrorField: string | undefined
+
     switch (etape) {
       case 1:
-        return !!(
-          values.nom_etablissement &&
-          values.nom_candidat &&
-          values.prenom_candidat &&
-          values.qualite_agissant &&
-          values.nom_structure &&
-          values.email &&
-          values.siret &&
-          values.naf &&
-          values.consentement_candidature
-        )
+        const fieldsEtape1 = [
+          'nom_etablissement', 'nom_candidat', 'prenom_candidat', 
+          'qualite_agissant', 'nom_structure', 'denomination_commerciale',
+          'adresse_siege_social', 'email', 'telephone', 'date_creation',
+          'forme_juridique', 'siret', 'naf', 'capital_social',
+          'effectif_2023', 'activite_principale', 'consentement_candidature'
+        ]
+        fieldsEtape1.forEach(field => {
+          const error = validateField(field, values[field as keyof typeof values])
+          if (error) {
+            errors[field] = error
+            if (!firstErrorField) firstErrorField = field
+          }
+        })
+        break
       case 2:
-        return true
+        const fieldsEtape2 = [
+          'description_activite', 'description_clientele', 'description_produits_services',
+          'modes_communication', 'support_martinique', 'points_forts', 'points_faibles',
+          'demarche_transition_numerique', 'inclusion_handicap_approche', 'inclusion_handicap_besoins',
+          'pourcentage_travailleurs_handicap', 'embauche_accompagnement_handicap',
+          'collaboration_entreprises_adaptees', 'raison_participation', 'axes_progres'
+        ]
+        fieldsEtape2.forEach(field => {
+          const error = validateField(field, values[field as keyof typeof values])
+          if (error) {
+            errors[field] = error
+            if (!firstErrorField) firstErrorField = field
+          }
+        })
+        break
       case 3:
-        return !!(values.categories_selectionnees && values.categories_selectionnees.length > 0)
+        const errorCategories = validateField('categories_selectionnees', values.categories_selectionnees)
+        if (errorCategories) {
+          errors['categories_selectionnees'] = errorCategories
+          firstErrorField = 'categories_selectionnees'
+        }
+        break
       case 4:
-        return !!(values.video_s3_url && values.autorisation_diffusion_video)
+        const fieldsEtape4 = ['video_s3_url', 'autorisation_diffusion_video']
+        fieldsEtape4.forEach(field => {
+          const error = validateField(field, values[field as keyof typeof values])
+          if (error) {
+            errors[field] = error
+            if (!firstErrorField) firstErrorField = field
+          }
+        })
+        break
       case 5:
-        return !!(values.acceptation_reglement && values.signature_image_s3_url)
-      default:
-        return true
+        const fieldsEtape5 = ['attestation_regularite_s3_url', 'fiche_insee_kbis_s3_url', 'acceptation_reglement', 'signature_image_s3_url']
+        fieldsEtape5.forEach(field => {
+          const error = validateField(field, values[field as keyof typeof values])
+          if (error) {
+            errors[field] = error
+            if (!firstErrorField) firstErrorField = field
+          }
+        })
+        break
     }
+
+    setValidationErrors(errors)
+    return { isValid: Object.keys(errors).length === 0, firstErrorField }
   }
 
   const handleNext = async () => {
-    if (!validateEtape(etapeActuelle)) {
+    const validation = validateEtape(etapeActuelle)
+    if (!validation.isValid) {
       toast.error('Veuillez remplir tous les champs obligatoires avant de continuer.')
+      if (validation.firstErrorField) {
+        scrollToError(validation.firstErrorField)
+      }
       return
     }
 
@@ -138,8 +290,12 @@ export default function FormulaireParticipation() {
   }
 
   const handleFinalSubmit = async () => {
-    if (!validateEtape(5)) {
-      toast.error('Veuillez accepter le règlement avant de soumettre.')
+    const validation = validateEtape(5)
+    if (!validation.isValid) {
+      toast.error('Veuillez remplir tous les champs obligatoires avant de soumettre.')
+      if (validation.firstErrorField) {
+        scrollToError(validation.firstErrorField)
+      }
       return
     }
 
@@ -177,6 +333,21 @@ export default function FormulaireParticipation() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Composant pour afficher les messages d'erreur
+  const ErrorMessage = ({ fieldName }: { fieldName: string }) => {
+    const error = validationErrors[fieldName]
+    if (!error) return null
+    
+    return (
+      <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+        </svg>
+        {error}
+      </p>
+    )
   }
 
   const clearSignature = () => {
@@ -257,9 +428,11 @@ export default function FormulaireParticipation() {
               type="text"
               required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.nom_etablissement ? '2px solid #ef4444' : '1px solid #DBB572' }}
               {...register('nom_etablissement', { required: true })}
+              data-field="nom_etablissement"
             />
+            <ErrorMessage fieldName="nom_etablissement" />
           </div>
           
           <div>
@@ -268,9 +441,11 @@ export default function FormulaireParticipation() {
               type="text"
               required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.nom_candidat ? '2px solid #ef4444' : '1px solid #DBB572' }}
               {...register('nom_candidat', { required: true })}
+              data-field="nom_candidat"
             />
+            <ErrorMessage fieldName="nom_candidat" />
           </div>
           
           <div>
@@ -279,9 +454,11 @@ export default function FormulaireParticipation() {
               type="text"
               required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.prenom_candidat ? '2px solid #ef4444' : '1px solid #DBB572' }}
               {...register('prenom_candidat', { required: true })}
+              data-field="prenom_candidat"
             />
+            <ErrorMessage fieldName="prenom_candidat" />
           </div>
           
           <div>
@@ -290,9 +467,11 @@ export default function FormulaireParticipation() {
               type="text"
               required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.qualite_agissant ? '2px solid #ef4444' : '1px solid #DBB572' }}
               {...register('qualite_agissant', { required: true })}
+              data-field="qualite_agissant"
             />
+            <ErrorMessage fieldName="qualite_agissant" />
           </div>
         </div>
       </div>
@@ -307,29 +486,37 @@ export default function FormulaireParticipation() {
               type="text"
               required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.nom_structure ? '2px solid #ef4444' : '1px solid #DBB572' }}
               {...register('nom_structure', { required: true })}
+              data-field="nom_structure"
             />
+            <ErrorMessage fieldName="nom_structure" />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Dénomination commerciale</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Dénomination commerciale *</label>
             <input
               type="text"
+              required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
-              {...register('denomination_commerciale')}
+              style={{ border: validationErrors.denomination_commerciale ? '2px solid #ef4444' : '1px solid #DBB572' }}
+              {...register('denomination_commerciale', { required: true })}
+              data-field="denomination_commerciale"
             />
+            <ErrorMessage fieldName="denomination_commerciale" />
           </div>
           
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Adresse (siège social)</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Adresse (siège social) *</label>
             <textarea
+              required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.adresse_siege_social ? '2px solid #ef4444' : '1px solid #DBB572' }}
               rows={3}
-              {...register('adresse_siege_social')}
+              {...register('adresse_siege_social', { required: true })}
+              data-field="adresse_siege_social"
             />
+            <ErrorMessage fieldName="adresse_siege_social" />
           </div>
           
           <div>
@@ -338,39 +525,50 @@ export default function FormulaireParticipation() {
               type="email"
               required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.email ? '2px solid #ef4444' : '1px solid #DBB572' }}
               {...register('email', { required: true })}
+              data-field="email"
             />
+            <ErrorMessage fieldName="email" />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Numéro de téléphone</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Numéro de téléphone *</label>
             <input
               type="tel"
+              required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
-              {...register('telephone')}
+              style={{ border: validationErrors.telephone ? '2px solid #ef4444' : '1px solid #DBB572' }}
+              {...register('telephone', { required: true })}
+              data-field="telephone"
             />
+            <ErrorMessage fieldName="telephone" />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Date de création</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Date de création *</label>
             <input
               type="date"
+              required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
-              {...register('date_creation')}
+              style={{ border: validationErrors.date_creation ? '2px solid #ef4444' : '1px solid #DBB572' }}
+              {...register('date_creation', { required: true })}
+              data-field="date_creation"
             />
+            <ErrorMessage fieldName="date_creation" />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Forme juridique</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Forme juridique *</label>
             <input
               type="text"
+              required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
-              {...register('forme_juridique')}
+              style={{ border: validationErrors.forme_juridique ? '2px solid #ef4444' : '1px solid #DBB572' }}
+              {...register('forme_juridique', { required: true })}
+              data-field="forme_juridique"
             />
+            <ErrorMessage fieldName="forme_juridique" />
           </div>
           
           <div>
@@ -379,9 +577,11 @@ export default function FormulaireParticipation() {
               type="text"
               required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.siret ? '2px solid #ef4444' : '1px solid #DBB572' }}
               {...register('siret', { required: true })}
+              data-field="siret"
             />
+            <ErrorMessage fieldName="siret" />
           </div>
           
           <div>
@@ -390,39 +590,50 @@ export default function FormulaireParticipation() {
               type="text"
               required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.naf ? '2px solid #ef4444' : '1px solid #DBB572' }}
               {...register('naf', { required: true })}
+              data-field="naf"
             />
+            <ErrorMessage fieldName="naf" />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Capital social</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Capital social *</label>
             <input
               type="number"
+              required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
-              {...register('capital_social', { valueAsNumber: true })}
+              style={{ border: validationErrors.capital_social ? '2px solid #ef4444' : '1px solid #DBB572' }}
+              {...register('capital_social', { required: true, valueAsNumber: true })}
+              data-field="capital_social"
             />
+            <ErrorMessage fieldName="capital_social" />
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Effectif de l&apos;établissement au 30 septembre 2023</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Effectif de l&apos;établissement au 30 septembre 2023 *</label>
             <input
               type="number"
+              required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
-              {...register('effectif_2023', { valueAsNumber: true })}
+              style={{ border: validationErrors.effectif_2023 ? '2px solid #ef4444' : '1px solid #DBB572' }}
+              {...register('effectif_2023', { required: true, valueAsNumber: true })}
+              data-field="effectif_2023"
             />
+            <ErrorMessage fieldName="effectif_2023" />
           </div>
           
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Activité principale</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Activité principale *</label>
             <textarea
+              required
               className="w-full p-3 rounded-md bg-white"
-              style={{ border: '1px solid #DBB572' }}
+              style={{ border: validationErrors.activite_principale ? '2px solid #ef4444' : '1px solid #DBB572' }}
               rows={3}
-              {...register('activite_principale')}
+              {...register('activite_principale', { required: true })}
+              data-field="activite_principale"
             />
+            <ErrorMessage fieldName="activite_principale" />
           </div>
         </div>
       </div>
@@ -433,12 +644,15 @@ export default function FormulaireParticipation() {
             type="checkbox"
             required
             className="mt-1"
+            style={{ accentColor: validationErrors.consentement_candidature ? '#ef4444' : '#DBB572' }}
             {...register('consentement_candidature', { required: true })}
+            data-field="consentement_candidature"
           />
           <span className="text-sm" style={{ color: 'white' }}>
             Oui, je souhaite la candidature de mon établissement au concours : Les Trophées des administrateurs &amp; entreprises inclusives de Bpifrance. J&apos;ai pris connaissance du règlement de ce concours, et j&apos;en accepte les termes.
           </span>
         </label>
+        <ErrorMessage fieldName="consentement_candidature" />
       </div>
     </div>
   )
@@ -469,182 +683,227 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Décrivez l&apos;activité de votre établissement
+                Décrivez l&apos;activité de votre établissement *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.description_activite ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('description_activite')}
+                {...register('description_activite', { required: true })}
+                data-field="description_activite"
               />
+              <ErrorMessage fieldName="description_activite" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Décrivez votre clientèle
+                Décrivez votre clientèle *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.description_clientele ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('description_clientele')}
+                {...register('description_clientele', { required: true })}
+                data-field="description_clientele"
               />
+              <ErrorMessage fieldName="description_clientele" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Décrivez vos produits et services
+                Décrivez vos produits et services *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.description_produits_services ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('description_produits_services')}
+                {...register('description_produits_services', { required: true })}
+                data-field="description_produits_services"
               />
+              <ErrorMessage fieldName="description_produits_services" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Modes de communication utilisés
+                Modes de communication utilisés *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.modes_communication ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('modes_communication')}
+                {...register('modes_communication', { required: true })}
+                data-field="modes_communication"
               />
+              <ErrorMessage fieldName="modes_communication" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Comment soutenez-vous la Martinique ?
+                Comment soutenez-vous la Martinique ? *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.support_martinique ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('support_martinique')}
+                {...register('support_martinique', { required: true })}
+                data-field="support_martinique"
               />
+              <ErrorMessage fieldName="support_martinique" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Points forts de votre établissement
+                Points forts de votre établissement *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.points_forts ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('points_forts')}
+                {...register('points_forts', { required: true })}
+                data-field="points_forts"
               />
+              <ErrorMessage fieldName="points_forts" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Points faibles et axes d&apos;amélioration
+                Points faibles et axes d&apos;amélioration *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.points_faibles ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('points_faibles')}
+                {...register('points_faibles', { required: true })}
+                data-field="points_faibles"
               />
+              <ErrorMessage fieldName="points_faibles" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Démarche de transition numérique
+                Démarche de transition numérique *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.demarche_transition_numerique ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('demarche_transition_numerique')}
+                {...register('demarche_transition_numerique', { required: true })}
+                data-field="demarche_transition_numerique"
               />
+              <ErrorMessage fieldName="demarche_transition_numerique" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Approche de l&apos;inclusion des personnes en situation de handicap
+                Approche de l&apos;inclusion des personnes en situation de handicap *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.inclusion_handicap_approche ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('inclusion_handicap_approche')}
+                {...register('inclusion_handicap_approche', { required: true })}
+                data-field="inclusion_handicap_approche"
               />
+              <ErrorMessage fieldName="inclusion_handicap_approche" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Besoins spécifiques pour l&apos;inclusion handicap
+                Besoins spécifiques pour l&apos;inclusion handicap *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.inclusion_handicap_besoins ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('inclusion_handicap_besoins')}
+                {...register('inclusion_handicap_besoins', { required: true })}
+                data-field="inclusion_handicap_besoins"
               />
+              <ErrorMessage fieldName="inclusion_handicap_besoins" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Pourcentage de travailleurs en situation de handicap
+                Pourcentage de travailleurs en situation de handicap *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.pourcentage_travailleurs_handicap ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('pourcentage_travailleurs_handicap')}
+                {...register('pourcentage_travailleurs_handicap', { required: true })}
+                data-field="pourcentage_travailleurs_handicap"
               />
+              <ErrorMessage fieldName="pourcentage_travailleurs_handicap" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Accompagnement à l&apos;embauche de personnes en situation de handicap
+                Accompagnement à l&apos;embauche de personnes en situation de handicap *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.embauche_accompagnement_handicap ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('embauche_accompagnement_handicap')}
+                {...register('embauche_accompagnement_handicap', { required: true })}
+                data-field="embauche_accompagnement_handicap"
               />
+              <ErrorMessage fieldName="embauche_accompagnement_handicap" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Collaboration avec des entreprises adaptées
+                Collaboration avec des entreprises adaptées *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.collaboration_entreprises_adaptees ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('collaboration_entreprises_adaptees')}
+                {...register('collaboration_entreprises_adaptees', { required: true })}
+                data-field="collaboration_entreprises_adaptees"
               />
+              <ErrorMessage fieldName="collaboration_entreprises_adaptees" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Raison de votre participation
+                Raison de votre participation *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.raison_participation ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('raison_participation')}
+                {...register('raison_participation', { required: true })}
+                data-field="raison_participation"
               />
+              <ErrorMessage fieldName="raison_participation" />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Axes de progrès souhaités
+                Axes de progrès souhaités *
               </label>
               <textarea
+                required
                 className="w-full p-3 rounded-md bg-white"
-                style={{ border: '1px solid #DBB572' }}
+                style={{ border: validationErrors.axes_progres ? '2px solid #ef4444' : '1px solid #DBB572' }}
                 rows={4}
-                {...register('axes_progres')}
+                {...register('axes_progres', { required: true })}
+                data-field="axes_progres"
               />
+              <ErrorMessage fieldName="axes_progres" />
             </div>
           </div>
         </div>
@@ -671,33 +930,36 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
           Sélectionnez la ou les catégories qui correspondent le mieux à votre établissement :
         </h2>
         
-        {CATEGORIES.map((categorie, index) => (
-          <label key={index} className="flex items-start space-x-3 p-4 rounded-lg cursor-pointer" style={{ border: '1px solid #DBB572', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
-            <input
-              type="checkbox"
-              className="mt-1"
-              value={categorie}
-              onChange={(e) => {
-                const categories = categoriesSelectionnees || []
-                if (e.target.checked) {
-                  setValue('categories_selectionnees', [...categories, categorie])
-                } else {
-                  setValue('categories_selectionnees', categories.filter(c => c !== categorie))
-                }
-              }}
-              checked={categoriesSelectionnees?.includes(categorie) || false}
-            />
-            <div>
-              <p className="font-medium" style={{ color: '#DBB572' }}>{categorie}</p>
-              <p className="text-sm mt-1" style={{ color: 'white' }}>
-                {index === 0 && "L'entreprise a recruté une ou plusieurs personnes en situation de handicap en contrat à durée indéterminée (CDI) ou en contrat à durée déterminée (CDD) d'au moins 6 mois."}
-                {index === 1 && "L'entreprise a mis en place des actions pour maintenir dans l'emploi un salarié devenu handicapé (aménagement de poste, formation, etc.)."}
-                {index === 2 && "L'entreprise a recruté un ou plusieurs alternants (apprentissage, contrat de professionnalisation) en situation de handicap."}
-                {index === 3 && "Les petites et moyennes entreprises (PME), les grandes entreprises et les administrations ont la possibilité de sous-traiter certaines activités à des établissements du secteur adapté et protégé. Ce mécanisme leur permet de soutenir activement l'emploi des personnes en situation de handicap et, le cas échéant, de réduire leur contribution à l'Agefiph/FIPHFP."}
-              </p>
-            </div>
-          </label>
-        ))}
+        <div data-field="categories_selectionnees" className="mt-3">
+          {CATEGORIES.map((categorie, index) => (
+            <label key={index} className="flex items-start space-x-3 p-4 rounded-lg cursor-pointer mt-3" style={{ border: validationErrors.categories_selectionnees ? '2px solid #ef4444' : '1px solid #DBB572', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
+              <input
+                type="checkbox"
+                className="mt-1"
+                value={categorie}
+                onChange={(e) => {
+                  const categories = categoriesSelectionnees || []
+                  if (e.target.checked) {
+                    setValue('categories_selectionnees', [...categories, categorie])
+                  } else {
+                    setValue('categories_selectionnees', categories.filter(c => c !== categorie))
+                  }
+                }}
+                checked={categoriesSelectionnees?.includes(categorie) || false}
+              />
+              <div>
+                <p className="font-medium" style={{ color: '#DBB572' }}>{categorie}</p>
+                <p className="text-sm mt-1" style={{ color: 'white' }}>
+                  {index === 0 && "L'entreprise a recruté une ou plusieurs personnes en situation de handicap en contrat à durée indéterminée (CDI) ou en contrat à durée déterminée (CDD) d'au moins 6 mois."}
+                  {index === 1 && "L'entreprise a mis en place des actions pour maintenir dans l'emploi un salarié devenu handicapé (aménagement de poste, formation, etc.)."}
+                  {index === 2 && "L'entreprise a recruté un ou plusieurs alternants (apprentissage, contrat de professionnalisation) en situation de handicap."}
+                  {index === 3 && "Les petites et moyennes entreprises (PME), les grandes entreprises et les administrations ont la possibilité de sous-traiter certaines activités à des établissements du secteur adapté et protégé. Ce mécanisme leur permet de soutenir activement l'emploi des personnes en situation de handicap et, le cas échéant, de réduire leur contribution à l'Agefiph/FIPHFP."}
+                </p>
+              </div>
+            </label>
+          ))}
+        </div>
+        <ErrorMessage fieldName="categories_selectionnees" />
       </div>
     </div>
   )
@@ -829,7 +1091,11 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
                 isVideoDragActive ? 'bg-blue-50' : 'hover:bg-gray-50'
               } ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
-              style={{ borderColor: '#DBB572', backgroundColor: isVideoDragActive ? 'rgba(219, 181, 114, 0.1)' : 'rgba(255, 255, 255, 0.05)' }}
+              style={{ 
+                borderColor: validationErrors.video_s3_url ? '#ef4444' : '#DBB572', 
+                backgroundColor: isVideoDragActive ? 'rgba(219, 181, 114, 0.1)' : 'rgba(255, 255, 255, 0.05)' 
+              }}
+              data-field="video_s3_url"
             >
               <input {...getVideoInputProps()} disabled={isUploading} />
               <div className="space-y-2">
@@ -846,6 +1112,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                 )}
               </div>
             </div>
+            <ErrorMessage fieldName="video_s3_url" />
 
             {/* Barre de progression */}
             {isUploading && (
@@ -897,17 +1164,15 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                 type="checkbox"
                 required
                 className="mt-1"
+                style={{ accentColor: validationErrors.autorisation_diffusion_video ? '#ef4444' : '#DBB572' }}
                 {...register('autorisation_diffusion_video', { required: true })}
+                data-field="autorisation_diffusion_video"
               />
               <span className="text-sm" style={{ color: 'white' }}>
                 J&apos;autorise la diffusion des vidéos sur la plateforme publique *
               </span>
             </label>
-            {errors.autorisation_diffusion_video && (
-              <p className="text-red-500 text-sm mt-1">
-                Vous devez autoriser la diffusion pour continuer
-              </p>
-            )}
+            <ErrorMessage fieldName="autorisation_diffusion_video" />
           </div>
         </div>
       </div>
@@ -1062,7 +1327,8 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                 <div
                   {...getAttestationRootProps()}
                   className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors"
-                  style={{ borderColor: '#DBB572', backgroundColor: isAttestationDragActive ? 'rgba(219, 181, 114, 0.1)' : 'rgba(255, 255, 255, 0.05)' }}
+                  style={{ borderColor: validationErrors.attestation_regularite_s3_url ? '#ef4444' : '#DBB572', backgroundColor: isAttestationDragActive ? 'rgba(219, 181, 114, 0.1)' : 'rgba(255, 255, 255, 0.05)' }}
+                  data-field="attestation_regularite_s3_url"
                 >
                   <input {...getAttestationInputProps()} />
                   <p className="text-sm" style={{ color: 'white' }}>
@@ -1079,6 +1345,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                     </p>
                   )}
                 </div>
+                <ErrorMessage fieldName="attestation_regularite_s3_url" />
               </div>
 
               <div>
@@ -1088,7 +1355,8 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                 <div
                   {...getKBISRootProps()}
                   className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors"
-                  style={{ borderColor: '#DBB572', backgroundColor: isKBISDragActive ? 'rgba(219, 181, 114, 0.1)' : 'rgba(255, 255, 255, 0.05)' }}
+                  style={{ borderColor: validationErrors.fiche_insee_kbis_s3_url ? '#ef4444' : '#DBB572', backgroundColor: isKBISDragActive ? 'rgba(219, 181, 114, 0.1)' : 'rgba(255, 255, 255, 0.05)' }}
+                  data-field="fiche_insee_kbis_s3_url"
                 >
                   <input {...getKBISInputProps()} />
                   <p className="text-sm" style={{ color: 'white' }}>
@@ -1105,6 +1373,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                     </p>
                   )}
                 </div>
+                <ErrorMessage fieldName="fiche_insee_kbis_s3_url" />
               </div>
             </div>
           </div>
@@ -1127,14 +1396,17 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                 type="checkbox"
                 required
                 className="mt-1"
+                style={{ accentColor: validationErrors.acceptation_reglement ? '#ef4444' : '#DBB572' }}
                 {...register('acceptation_reglement', { required: true })}
+                data-field="acceptation_reglement"
               />
-              <span className="text-sm" style={{ color: 'white' }}>J&apos;ai lu et accepté le règlement</span>
+              <span className="text-sm" style={{ color: 'white' }}>J&apos;ai lu et accepté le règlement *</span>
             </label>
+            <ErrorMessage fieldName="acceptation_reglement" />
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Votre signature *</label>
-              <div className="rounded-lg p-4" style={{ border: '2px solid #DBB572' }}>
+              <div className="rounded-lg p-4" style={{ border: validationErrors.signature_image_s3_url ? '2px solid #ef4444' : '2px solid #DBB572' }} data-field="signature_image_s3_url">
                 {existingSignatureUrl ? (
                   <div className="space-y-4">
                     <div className="text-center">
@@ -1202,6 +1474,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                   </div>
                 )}
               </div>
+              <ErrorMessage fieldName="signature_image_s3_url" />
             </div>
           </div>
         </div>
