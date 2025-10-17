@@ -13,7 +13,7 @@ const SecondSection: React.FC = () => {
               className="text-4xl lg:text-5xl font-bold uppercase leading-tight"
               style={{
                 color: '#DBB572',
-                fontFamily: 'Poppins',
+               
                 fontSize: '40px',
                 fontWeight: 700,
                 textTransform: 'uppercase'
@@ -29,7 +29,7 @@ const SecondSection: React.FC = () => {
               className="text-lg leading-relaxed"
               style={{
                 color: '#EBE7E1',
-                fontFamily: 'Poppins',
+               
                 fontSize: '18px',
                 fontWeight: 400
               }}
