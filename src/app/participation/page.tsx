@@ -34,7 +34,7 @@ export default function FormulaireParticipation() {
   const signatureRef = useRef<SignatureCanvas>(null)
   
   // React Hook Form - Utiliser watch uniquement pour les champs spécifiques
-  const { register, getValues, setValue, watch, formState: { errors } } = useForm<Partial<ParticipationData>>({
+  const { register, getValues, setValue, watch } = useForm<Partial<ParticipationData>>({
     defaultValues: {
       etape_actuelle: 1,
       statut: 'draft'
@@ -61,81 +61,93 @@ export default function FormulaireParticipation() {
     }
   }
 
+  // Fonction helper pour convertir les valeurs en string
+  const getStringValue = (value: string | number | boolean | string[] | null | undefined): string => {
+    if (value === null || value === undefined) return ''
+    if (typeof value === 'string') return value
+    if (typeof value === 'number') return value.toString()
+    if (typeof value === 'boolean') return value.toString()
+    if (Array.isArray(value)) return value.join(', ')
+    return ''
+  }
+
   // Fonction pour valider un champ spécifique
-  const validateField = (fieldName: string, value: any): string => {
+  const validateField = (fieldName: string, value: string | number | boolean | string[] | null | undefined): string => {
+    const stringValue = getStringValue(value)
+    
     switch (fieldName) {
       case 'nom_etablissement':
-        return !value || value.trim() === '' ? 'Le nom de l\'établissement est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Le nom de l\'établissement est obligatoire' : ''
       case 'nom_candidat':
-        return !value || value.trim() === '' ? 'Le nom du candidat est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Le nom du candidat est obligatoire' : ''
       case 'prenom_candidat':
-        return !value || value.trim() === '' ? 'Le prénom du candidat est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Le prénom du candidat est obligatoire' : ''
       case 'qualite_agissant':
-        return !value || value.trim() === '' ? 'La qualité d\'agissant est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'La qualité d\'agissant est obligatoire' : ''
       case 'nom_structure':
-        return !value || value.trim() === '' ? 'Le nom de la structure est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Le nom de la structure est obligatoire' : ''
       case 'email':
-        if (!value || value.trim() === '') return 'L\'adresse email est obligatoire'
+        if (!stringValue || stringValue.trim() === '') return 'L\'adresse email est obligatoire'
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        return !emailRegex.test(value) ? 'Veuillez saisir une adresse email valide' : ''
+        return !emailRegex.test(stringValue) ? 'Veuillez saisir une adresse email valide' : ''
       case 'siret':
-        return !value || value.trim() === '' ? 'Le numéro SIRET est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Le numéro SIRET est obligatoire' : ''
       case 'naf':
-        return !value || value.trim() === '' ? 'Le code NAF est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Le code NAF est obligatoire' : ''
       case 'consentement_candidature':
         return !value ? 'Vous devez accepter les conditions de candidature' : ''
       case 'denomination_commerciale':
-        return !value || value.trim() === '' ? 'La dénomination commerciale est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'La dénomination commerciale est obligatoire' : ''
       case 'adresse_siege_social':
-        return !value || value.trim() === '' ? 'L\'adresse du siège social est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'L\'adresse du siège social est obligatoire' : ''
       case 'telephone':
-        return !value || value.trim() === '' ? 'Le numéro de téléphone est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Le numéro de téléphone est obligatoire' : ''
       case 'date_creation':
         return !value ? 'La date de création est obligatoire' : ''
       case 'forme_juridique':
-        return !value || value.trim() === '' ? 'La forme juridique est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'La forme juridique est obligatoire' : ''
       case 'capital_social':
         return !value ? 'Le capital social est obligatoire' : ''
       case 'effectif_2023':
         return !value ? 'L\'effectif au 30 septembre 2023 est obligatoire' : ''
       case 'activite_principale':
-        return !value || value.trim() === '' ? 'L\'activité principale est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'L\'activité principale est obligatoire' : ''
       case 'description_activite':
-        return !value || value.trim() === '' ? 'La description de l\'activité est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'La description de l\'activité est obligatoire' : ''
       case 'description_clientele':
-        return !value || value.trim() === '' ? 'La description de la clientèle est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'La description de la clientèle est obligatoire' : ''
       case 'description_produits_services':
-        return !value || value.trim() === '' ? 'La description des produits et services est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'La description des produits et services est obligatoire' : ''
       case 'modes_communication':
-        return !value || value.trim() === '' ? 'Les modes de communication sont obligatoires' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Les modes de communication sont obligatoires' : ''
       case 'support_martinique':
-        return !value || value.trim() === '' ? 'Le soutien à la Martinique est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Le soutien à la Martinique est obligatoire' : ''
       case 'points_forts':
-        return !value || value.trim() === '' ? 'Les points forts sont obligatoires' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Les points forts sont obligatoires' : ''
       case 'points_faibles':
-        return !value || value.trim() === '' ? 'Les points faibles et axes d\'amélioration sont obligatoires' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Les points faibles et axes d\'amélioration sont obligatoires' : ''
       case 'demarche_transition_numerique':
-        return !value || value.trim() === '' ? 'La démarche de transition numérique est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'La démarche de transition numérique est obligatoire' : ''
       case 'inclusion_handicap_approche':
-        return !value || value.trim() === '' ? 'L\'approche de l\'inclusion des personnes en situation de handicap est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'L\'approche de l\'inclusion des personnes en situation de handicap est obligatoire' : ''
       case 'inclusion_handicap_besoins':
-        return !value || value.trim() === '' ? 'Les besoins spécifiques pour l\'inclusion handicap sont obligatoires' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Les besoins spécifiques pour l\'inclusion handicap sont obligatoires' : ''
       case 'pourcentage_travailleurs_handicap':
-        return !value || value.trim() === '' ? 'Le pourcentage de travailleurs en situation de handicap est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Le pourcentage de travailleurs en situation de handicap est obligatoire' : ''
       case 'embauche_accompagnement_handicap':
-        return !value || value.trim() === '' ? 'L\'accompagnement à l\'embauche de personnes en situation de handicap est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'L\'accompagnement à l\'embauche de personnes en situation de handicap est obligatoire' : ''
       case 'collaboration_entreprises_adaptees':
-        return !value || value.trim() === '' ? 'La collaboration avec des entreprises adaptées est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'La collaboration avec des entreprises adaptées est obligatoire' : ''
       case 'raison_participation':
-        return !value || value.trim() === '' ? 'La raison de votre participation est obligatoire' : ''
+        return !stringValue || stringValue.trim() === '' ? 'La raison de votre participation est obligatoire' : ''
       case 'axes_progres':
-        return !value || value.trim() === '' ? 'Les axes de progrès souhaités sont obligatoires' : ''
+        return !stringValue || stringValue.trim() === '' ? 'Les axes de progrès souhaités sont obligatoires' : ''
       case 'attestation_regularite_s3_url':
         return !value ? 'L\'attestation de régularité fiscale et sociale est obligatoire' : ''
       case 'fiche_insee_kbis_s3_url':
         return !value ? 'L\'extrait KBIS est obligatoire' : ''
       case 'categories_selectionnees':
-        return !value || value.length === 0 ? 'Vous devez sélectionner au moins une catégorie' : ''
+        return !value || (Array.isArray(value) && value.length === 0) ? 'Vous devez sélectionner au moins une catégorie' : ''
       case 'video_s3_url':
         return !value ? 'Vous devez télécharger une vidéo de présentation' : ''
       case 'autorisation_diffusion_video':
@@ -1145,7 +1157,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                   </video>
                   <div className="mt-2 text-center">
                     <p className="text-sm" style={{ color: '#DBB572' }}>
-                      ✓ Vidéo uploadée avec succès sur S3
+                      ✓ Vidéo uploadée avec succès 
                     </p>
                     {existingVideoUrl && (
                       <p className="text-xs mt-1" style={{ color: '#DBB572' }}>
