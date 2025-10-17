@@ -579,7 +579,7 @@ export default function ParticipationsPage() {
                 onClick={() => handleSort('created_at')}
               >
                 <div className="flex items-center gap-2">
-                  Date d'enregistrement
+                  Date d&apos;enregistrement
                   {getSortIcon('created_at')}
                 </div>
               </TableHead>
