@@ -639,6 +639,7 @@ export default function ParticipationsPage() {
                         <SelectItem value="en attente">En attente</SelectItem>
                         <SelectItem value="validé">Validé</SelectItem>
                         <SelectItem value="refusé">Refusé</SelectItem>
+                        <SelectItem value="draft">Brouillon</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
