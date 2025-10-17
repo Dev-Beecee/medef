@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function CandidaterSection() {
   return (
-    <section className="w-full py-20 bg-white">
+    <section className="w-full py-20 bg-white" id="candidature">
       <div className="max-w-6xl mx-auto px-6 text-center space-y-12">
 
         {/* Titre */}

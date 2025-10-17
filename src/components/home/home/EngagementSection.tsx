@@ -3,8 +3,8 @@ import { BoutonParticipation } from "@/components/BoutonParticipation";
 
 export default function EngagementSection() {
   return (
-    <section
-      className="w-full py-20"
+    <section 
+      className="w-full py-20" id="participation"
       style={{
         backgroundColor: "#10214B",
         backgroundImage: "url('/seeph-bg-enparticipant_2x.png')",

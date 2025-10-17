@@ -2,7 +2,7 @@ import { CalendarHeart } from "lucide-react";
 
 export default function CalendrierSection() {
   return (
-    <section className="w-full py-20 bg-white">
+    <section className="w-full py-20 bg-white" id="calendrier">
       <div className="max-w-6xl mx-auto px-6 text-center space-y-12">
 
         {/* Titre */}

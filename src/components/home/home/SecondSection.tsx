@@ -2,7 +2,7 @@ import React from 'react';
 
 const SecondSection: React.FC = () => {
   return (
-    <section className="py-16 px-4 w-full  " style={{
+    <section className="py-16 px-4 w-full  " id="second-section" style={{
       backgroundColor: "#10214B",
     }}>
       <div className="max-w-7xl mx-auto">

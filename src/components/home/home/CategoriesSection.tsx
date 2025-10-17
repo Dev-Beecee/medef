@@ -1,7 +1,7 @@
 export default function CategoriesSection() {
   return (
     <section
-      className="w-full py-20"
+      className="w-full py-20" id="categories"
       style={{
         background: "linear-gradient(180deg, #10214B 0%, #FFFFFF 100%)",
       }}

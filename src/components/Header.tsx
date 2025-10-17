@@ -12,11 +12,11 @@ const Header: React.FC = () => {
   };
 
   const navLinks = [
-    { href: '#categories', label: 'Catégories' },
-    { href: '#candidature', label: 'Candidature' },
-    { href: '#participation', label: 'Participation' },
-    { href: '#calendrier', label: 'Calendrier' },
-    { href: '#partenaires', label: 'Partenaires' }
+    { href: '/#categories', label: 'Catégories' },
+    { href: '/#candidature', label: 'Candidature' },
+    { href: '/#participation', label: 'Participation' },
+    { href: '/#calendrier', label: 'Calendrier' },
+    { href: '/#partenaires', label: 'Partenaires' }
   ];
 
   return (
