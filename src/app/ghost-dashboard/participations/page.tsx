@@ -29,7 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Eye, Loader2, Search, Filter, Download, FileText } from 'lucide-react'
+import { Eye, Loader2, Search, Filter, Download, FileText, ChevronLeft, ChevronRight } from 'lucide-react'
 import { exportParticipationsToPDF, exportSingleParticipationToPDF } from '@/lib/pdfExport'
 import { ExportProgressDialog } from '@/components/ExportProgressDialog'
 
@@ -107,6 +107,10 @@ export default function ParticipationsPage() {
   })
 
   const [categoryNames, setCategoryNames] = useState<{ [key: string]: string }>({})
+  
+  // États pour la pagination
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   useEffect(() => {
     fetchParticipations()
@@ -343,6 +347,28 @@ export default function ParticipationsPage() {
     return matchesStatut && matchesSearch
   })
 
+  // Calculs de pagination
+  const totalPages = Math.ceil(filteredParticipations.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedParticipations = filteredParticipations.slice(startIndex, endIndex)
+
+  // Réinitialiser la page courante quand les filtres changent
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, filterStatut])
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -360,9 +386,31 @@ export default function ParticipationsPage() {
             Gérez toutes les participations au concours
           </p>
         </div>
-        <Badge variant="outline" className="text-lg px-4 py-2">
-          {filteredParticipations.length} / {participations.length} participation{participations.length > 1 ? 's' : ''}
-        </Badge>
+        <div className="flex items-center gap-4">
+          <Badge variant="outline" className="text-lg px-4 py-2">
+            {filteredParticipations.length} / {participations.length} participation{participations.length > 1 ? 's' : ''}
+          </Badge>
+          
+          {/* Sélecteur d'éléments par page */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Afficher :</span>
+            <Select value={itemsPerPage.toString()} onValueChange={(value) => {
+              setItemsPerPage(Number(value))
+              setCurrentPage(1)
+            }}>
+              <SelectTrigger className="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       {/* Filtres */}
@@ -433,6 +481,7 @@ export default function ParticipationsPage() {
               <TableHead>Structure</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Téléphone</TableHead>
+              <TableHead>Date d'enregistrement</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -440,14 +489,14 @@ export default function ParticipationsPage() {
           <TableBody>
             {filteredParticipations.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center h-24 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center h-24 text-muted-foreground">
                   {searchTerm || filterStatut !== 'all' 
                     ? 'Aucune participation ne correspond aux filtres'
                     : 'Aucune participation trouvée'}
                 </TableCell>
               </TableRow>
             ) : (
-              filteredParticipations.map((participation) => (
+              paginatedParticipations.map((participation) => (
                 <TableRow key={participation.id}>
                   <TableCell className="font-medium">
                     {participation.nom_etablissement}
@@ -468,6 +517,7 @@ export default function ParticipationsPage() {
                   </TableCell>
                   <TableCell>{participation.email}</TableCell>
                   <TableCell>{participation.telephone || '-'}</TableCell>
+                  <TableCell>{formatDate(participation.created_at)}</TableCell>
                   <TableCell>
                     <Select
                       defaultValue={participation.statut || 'en attente'}
@@ -621,6 +671,64 @@ export default function ParticipationsPage() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Contrôles de pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Affichage de {startIndex + 1} à {Math.min(endIndex, filteredParticipations.length)} sur {filteredParticipations.length} participation{filteredParticipations.length > 1 ? 's' : ''}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Précédent
+            </Button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNumber
+                if (totalPages <= 5) {
+                  pageNumber = i + 1
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i
+                } else {
+                  pageNumber = currentPage - 2 + i
+                }
+                
+                return (
+                  <Button
+                    key={pageNumber}
+                    variant={currentPage === pageNumber ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className="w-8 h-8 p-0"
+                  >
+                    {pageNumber}
+                  </Button>
+                )
+              })}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Suivant
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Dialog de progression */}
       <ExportProgressDialog
