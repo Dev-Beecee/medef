@@ -16,8 +16,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MEDEF - Formulaire de Participation",
-  description: "Formulaire de candidature pour les Trophées des administrateurs & entreprises inclusives",
+  title: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
+  description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 2 novembre.",
+  openGraph: {
+    title: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
+    description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 2 novembre.",
+    url: "https://seeph-medef-martinique.fr",
+    siteName: "SEEPH MEDEF Martinique",
+    images: [
+      {
+        url: "/seeph-partage.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
+      },
+    ],
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
+    description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 2 novembre.",
+    images: ["/seeph-partage.jpg"],
+  },
+  metadataBase: new URL("https://seeph-medef-martinique.fr"),
+  alternates: {
+    canonical: "https://seeph-medef-martinique.fr",
+  },
 };
 
 export default function RootLayout({
