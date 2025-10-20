@@ -690,12 +690,12 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Questions sur votre entreprise</h3>
+          <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Présentation de l’entreprise / établissement</h3>
           
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Décrivez l&apos;activité de votre établissement *
+              Description générale de l’activité de votre entreprise / établissement *
               </label>
               <textarea
                 required
@@ -710,7 +710,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Décrivez votre clientèle *
+              Description de la clientèle (localisation, type de clientèle) ou de votre activité (Fonction publique) *
               </label>
               <textarea
                 required
@@ -725,7 +725,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Décrivez vos produits et services *
+              Description de vos produits / votre prestation de service / (“produits”: provenance ou fabriqués par vous) / Vos missions *
               </label>
               <textarea
                 required
@@ -740,7 +740,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Modes de communication utilisés *
+              Quels sont vos modes de communication (carte de visite, presse écrite, réseaux sociaux, site internet, etc...)*
               </label>
               <textarea
                 required
@@ -755,7 +755,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Comment soutenez-vous la Martinique ? *
+              Expliquez votre apport pour le territoire de la Martinique *
               </label>
               <textarea
                 required
@@ -800,7 +800,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Démarche de transition numérique *
+              Avez-vous amorcé une démarche de transition numérique ? *
               </label>
               <textarea
                 required
@@ -812,10 +812,11 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
               />
               <ErrorMessage fieldName="demarche_transition_numerique" />
             </div>
-
+<div> <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Inclusion du handicap</h3></div>
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Approche de l&apos;inclusion des personnes en situation de handicap *
+              Comment avez-vous inclus la dimension du handicap au sein de l’entreprise / établissement (recrutement, action de sensibilisation) ? *
+              (Cette information sera affichée publiquement pour la présentation de la vidéo) *
               </label>
               <textarea
                 required
@@ -830,7 +831,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Besoins spécifiques pour l&apos;inclusion handicap *
+              Quels sont vos besoins (matériel / financiers / ressources humaines) dans le cadre de l’inclusion du handicap au sein de votre établissement ?*
               </label>
               <textarea
                 required
@@ -845,7 +846,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Pourcentage de travailleurs en situation de handicap *
+              Quel est le pourcentage de travailleurs en situation de handicap, au sein de votre structure ? *
               </label>
               <textarea
                 required
@@ -860,7 +861,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Accompagnement à l&apos;embauche de personnes en situation de handicap *
+              Avez-vous embouché en alternance, des travailleurs en situation handicap ? *
               </label>
               <textarea
                 required
@@ -875,7 +876,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Collaboration avec des entreprises adaptées *
+              Si vous avez choisi de faire appel à des entreprises adaptées ou établissements et services d’aide par le travail, expliquez pour quelles raisons ?*
               </label>
               <textarea
                 required
@@ -887,10 +888,12 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
               />
               <ErrorMessage fieldName="collaboration_entreprises_adaptees" />
             </div>
-
+            <div> <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Le concours “Les trophées des
+administrations & entreprises
+inclusives de Martinique” : Vos attentes</h3></div>
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Raison de votre participation *
+              Pourquoi participer à ce concours ? *
               </label>
               <textarea
                 required
@@ -905,7 +908,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-                Axes de progrès souhaités *
+              Quels seraient à votre avis vos axes de progrès (améliorations, freins, etc...) ? *
               </label>
               <textarea
                 required
@@ -1506,7 +1509,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
   }
 
   return (
-    <div className="min-h-screen py-8" style={{ backgroundColor: '#10214B', backgroundImage: 'url(/seeph-bg-top.png)', backgroundPosition: '50% -80%', backgroundRepeat: 'no-repeat', backgroundSize: 'cover' }}>
+    <div className="min-h-screen py-8" style={{ backgroundColor: '#10214B' }}>
       <div className="max-w-4xl mx-auto px-4">
         {/* Barre de progression */}
         <div className="mb-8">
