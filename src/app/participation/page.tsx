@@ -661,7 +661,7 @@ export default function FormulaireParticipation() {
             data-field="consentement_candidature"
           />
           <span className="text-sm" style={{ color: 'white' }}>
-            Oui, je souhaite la candidature de mon établissement au concours : Les Trophées des administrateurs &amp; entreprises inclusives de Bpifrance. J&apos;ai pris connaissance du règlement de ce concours, et j&apos;en accepte les termes.
+            Oui, je souhaite la candidature de mon établissements au concours : Les Trophées des administrateurs &amp; entreprises inclusives de Bpifrance. J&apos;ai pris connaissance du règlement de ce concours, et j&apos;en accepte les termes.
           </span>
         </label>
         <ErrorMessage fieldName="consentement_candidature" />
