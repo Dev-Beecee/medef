@@ -88,13 +88,13 @@ const VideoCard: React.FC<VideoCardProps> = ({ participation, categoryId, curren
         {isExpanded && (
           <div className="space-y-2">
             <p className="text-sm text-white mb-2">
-              <strong>Activité de l’entreprise :</strong> 
+              <strong>Engagement en faveur de l’inclusion</strong> 
             </p>
             <p className="text-sm text-white mb-2">
               {participation.inclusion_handicap_approche}
             </p>
             <p className="text-sm text-white mb-2">
-              <strong>Activité principale :</strong> 
+              <strong>Activité de l’entreprise :</strong> 
             </p>
             <p className="text-sm text-white mb-2">
               {participation.activite_principale}
