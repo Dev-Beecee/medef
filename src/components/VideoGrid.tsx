@@ -82,13 +82,13 @@ const VideoCard: React.FC<VideoCardProps> = ({ participation, categoryId, curren
             color: 'white'
           }}
         >
-          {isExpanded ? 'Masquer les détails' : 'Voir l\'approche de l\'inclusion handicap et l\'activité principale'}
+          {isExpanded ? 'Masquer les détails' : 'Découvrir leur engagement et leur activité principale'}
         </button>
         
         {isExpanded && (
           <div className="space-y-2">
             <p className="text-sm text-white mb-2">
-              <strong>Approche inclusion handicap :</strong> 
+              <strong>Activité de l’entreprise :</strong> 
             </p>
             <p className="text-sm text-white mb-2">
               {participation.inclusion_handicap_approche}
