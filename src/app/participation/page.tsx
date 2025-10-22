@@ -32,7 +32,7 @@ export default function FormulaireParticipation() {
   const [isPacteDialogOpen, setIsPacteDialogOpen] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const signatureRef = useRef<SignatureCanvas>(null)
-  
+
   // React Hook Form - Utiliser watch uniquement pour les champs spécifiques
   const { register, getValues, setValue, watch } = useForm<Partial<ParticipationData>>({
     defaultValues: {
@@ -44,15 +44,15 @@ export default function FormulaireParticipation() {
 
   // Surveiller uniquement le champ categories_selectionnees pour l'étape 3
   const categoriesSelectionnees = watch('categories_selectionnees')
-  
+
   // Fonction pour scroller vers un élément en erreur
   const scrollToError = (fieldName: string) => {
-    const element = document.querySelector(`[name="${fieldName}"]`) || 
-                   document.querySelector(`[data-field="${fieldName}"]`)
+    const element = document.querySelector(`[name="${fieldName}"]`) ||
+      document.querySelector(`[data-field="${fieldName}"]`)
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
       })
       // Focus sur l'élément si c'est un input
       if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
@@ -74,7 +74,7 @@ export default function FormulaireParticipation() {
   // Fonction pour valider un champ spécifique
   const validateField = (fieldName: string, value: string | number | boolean | string[] | null | undefined): string => {
     const stringValue = getStringValue(value)
-    
+
     switch (fieldName) {
       case 'nom_etablissement':
         return !stringValue || stringValue.trim() === '' ? 'Le nom de l\'établissement est obligatoire' : ''
@@ -168,7 +168,7 @@ export default function FormulaireParticipation() {
           .from('participations')
           .update(data)
           .eq('id', participationId)
-        
+
         if (error) throw error
       } else {
         const insertData = {
@@ -183,13 +183,13 @@ export default function FormulaireParticipation() {
           naf: data.naf || '',
           consentement_candidature: data.consentement_candidature || false
         }
-        
+
         const { data: newParticipation, error } = await supabase
           .from('participations')
           .insert(insertData)
           .select()
           .single()
-        
+
         if (error) throw error
         if (newParticipation) {
           setParticipationId(newParticipation.id)
@@ -209,7 +209,7 @@ export default function FormulaireParticipation() {
     switch (etape) {
       case 1:
         const fieldsEtape1 = [
-          'nom_etablissement', 'nom_candidat', 'prenom_candidat', 
+          'nom_etablissement', 'nom_candidat', 'prenom_candidat',
           'qualite_agissant', 'nom_structure', 'denomination_commerciale',
           'adresse_siege_social', 'email', 'telephone', 'date_creation',
           'forme_juridique', 'siret', 'naf', 'capital_social',
@@ -313,8 +313,8 @@ export default function FormulaireParticipation() {
 
     setLoading(true)
     try {
-      const finalData = { 
-        ...getValues(), 
+      const finalData = {
+        ...getValues(),
         formulaire_complete: true,
         statut: 'en attente',
         etape_actuelle: 5
@@ -324,7 +324,7 @@ export default function FormulaireParticipation() {
         description: 'Votre candidature a été enregistrée et sera traitée dans les plus brefs délais.',
         duration: 5000
       })
-      
+
       // Rediriger vers la page de confirmation avec les données
       setTimeout(() => {
         const params = new URLSearchParams({
@@ -351,7 +351,7 @@ export default function FormulaireParticipation() {
   const ErrorMessage = ({ fieldName }: { fieldName: string }) => {
     const error = validationErrors[fieldName]
     if (!error) return null
-    
+
     return (
       <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -375,22 +375,22 @@ export default function FormulaireParticipation() {
     }
 
     const signatureDataURL = signatureRef.current.toDataURL()
-    
+
     // Upload vers S3
     const uploadToastId = toast.loading('Enregistrement de la signature...', {
       description: 'Upload en cours'
     })
-    
+
     try {
       const result = await uploadSignatureToS3(signatureDataURL, participationId || undefined)
-      
+
       if (result.success && result.url) {
         setValue('signature_image_s3_url', result.url)
-        
+
         // Sauvegarder automatiquement l'URL dans la base de données
         const currentData = { ...getValues(), signature_image_s3_url: result.url }
         await saveParticipation(currentData)
-        
+
         toast.success('Signature enregistrée avec succès !', {
           id: uploadToastId,
           description: 'Signature uploadée sur S3'
@@ -415,24 +415,24 @@ export default function FormulaireParticipation() {
         <h1 className="text-3xl font-bold mb-4 mt-4 uppercase" style={{ color: '#DBB572' }}>Candidature</h1>
         <div className="text-center mb-8" style={{ backgroundColor: '#DBB572', color: '#10214B', padding: '40px', borderRadius: '20px' }}>
           <p>
-            Présentez les informations essentielles de votre entreprise ou établissement. 
+            Présentez les informations essentielles de votre entreprise ou établissement.
           </p>
           <p>Remplissez tous les champs obligatoires avant de passer à l&apos;étape suivante.</p>
-          
+
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '30px' }}>
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M31.501 14.9969H4.50098M31.501 18.7469V13.1969C31.501 10.6767 31.501 9.41659 31.0105 8.45399C30.5791 7.60726 29.8907 6.91885 29.0439 6.48742C28.0813 5.99695 26.8212 5.99695 24.301 5.99695H11.701C9.18074 5.99695 7.92062 5.99695 6.95802 6.48742C6.11129 6.91885 5.42288 7.60726 4.99145 8.45399C4.50098 9.41659 4.50098 10.6767 4.50098 13.1969V25.7969C4.50098 28.3172 4.50098 29.5773 4.99145 30.5399C5.42288 31.3866 6.11129 32.075 6.95802 32.5065C7.92062 32.9969 9.18074 32.9969 11.701 32.9969H18.001M24.001 2.99695V8.99695M12.001 2.99695V8.99695M21.751 28.4969L24.751 31.4969L31.501 24.7469" stroke="#10214B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M31.501 14.9969H4.50098M31.501 18.7469V13.1969C31.501 10.6767 31.501 9.41659 31.0105 8.45399C30.5791 7.60726 29.8907 6.91885 29.0439 6.48742C28.0813 5.99695 26.8212 5.99695 24.301 5.99695H11.701C9.18074 5.99695 7.92062 5.99695 6.95802 6.48742C6.11129 6.91885 5.42288 7.60726 4.99145 8.45399C4.50098 9.41659 4.50098 10.6767 4.50098 13.1969V25.7969C4.50098 28.3172 4.50098 29.5773 4.99145 30.5399C5.42288 31.3866 6.11129 32.075 6.95802 32.5065C7.92062 32.9969 9.18074 32.9969 11.701 32.9969H18.001M24.001 2.99695V8.99695M12.001 2.99695V8.99695M21.751 28.4969L24.751 31.4969L31.501 24.7469" stroke="#10214B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
 
           <p><strong>Date limite de dépôt du dossier :</strong></p>
-          <p><strong>2 novembre 2025 à 23h59</strong></p>
+          <p><strong>4 novembre 2025 à 23h59</strong></p>
         </div>
       </div>
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold" style={{ color: '#DBB572' }}>Informations générales du candidat/établissement</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Nom de l&apos;établissement *</label>
@@ -446,7 +446,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="nom_etablissement" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Nom du candidat *</label>
             <input
@@ -459,7 +459,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="nom_candidat" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Prénom du candidat *</label>
             <input
@@ -472,7 +472,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="prenom_candidat" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Agissant en qualité de *</label>
             <input
@@ -490,7 +490,7 @@ export default function FormulaireParticipation() {
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold" style={{ color: '#DBB572' }}>Présentation de votre établissement</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Nom de la structure *</label>
@@ -504,7 +504,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="nom_structure" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Dénomination commerciale *</label>
             <input
@@ -517,7 +517,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="denomination_commerciale" />
           </div>
-          
+
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Adresse (siège social) *</label>
             <textarea
@@ -530,7 +530,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="adresse_siege_social" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Adresse email *</label>
             <input
@@ -543,7 +543,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="email" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Numéro de téléphone *</label>
             <input
@@ -556,7 +556,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="telephone" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Date de création *</label>
             <input
@@ -569,7 +569,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="date_creation" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Forme juridique *</label>
             <input
@@ -582,7 +582,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="forme_juridique" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>N° SIRET *</label>
             <input
@@ -595,7 +595,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="siret" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>N° NAF *</label>
             <input
@@ -608,7 +608,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="naf" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Capital social *</label>
             <input
@@ -621,7 +621,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="capital_social" />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Effectif de l&apos;établissement au 30 septembre 2023 *</label>
             <input
@@ -634,7 +634,7 @@ export default function FormulaireParticipation() {
             />
             <ErrorMessage fieldName="effectif_2023" />
           </div>
-          
+
           <div className="md:col-span-2">
             <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Activité principale *</label>
             <textarea
@@ -672,30 +672,30 @@ export default function FormulaireParticipation() {
   // ÉTAPE 2: Informations entreprise
   const Etape2 = () => (
     <div className="space-y-6">
-      
+
 
       <div className="text-center mb-8">
-       <p className="text-lg font-semibold" style={{ backgroundColor: '#DBB572', color: '#10214B', width: 'max-content', padding: '3px 14px', margin: 'auto', borderRadius: '5px' }}>Étape 2</p>
-       <h1 className="text-3xl font-bold mb-4 mt-4 uppercase" style={{ color: '#DBB572' }}>Informations entreprise</h1>
-       <div className="text-center mb-8" style={{ backgroundColor: '#DBB572', color: '#10214B', padding: '40px', borderRadius: '20px' }}>
-         <p>
-         Décrivez votre entreprise ou établissement et précisez <strong>comment la dimension du handicap est intégrée dans votre fonctionnement</strong> (recrutement, sensibilisation, accompagnement, aménagements…).
-Ces éléments permettront au jury d’apprécier et d’évaluer votre démarche inclusive.<br></br><br></br>
-Remplissez l’ensemble des champs obligatoires avant de poursuivre.
+        <p className="text-lg font-semibold" style={{ backgroundColor: '#DBB572', color: '#10214B', width: 'max-content', padding: '3px 14px', margin: 'auto', borderRadius: '5px' }}>Étape 2</p>
+        <h1 className="text-3xl font-bold mb-4 mt-4 uppercase" style={{ color: '#DBB572' }}>Informations entreprise</h1>
+        <div className="text-center mb-8" style={{ backgroundColor: '#DBB572', color: '#10214B', padding: '40px', borderRadius: '20px' }}>
+          <p>
+            Décrivez votre entreprise ou établissement et précisez <strong>comment la dimension du handicap est intégrée dans votre fonctionnement</strong> (recrutement, sensibilisation, accompagnement, aménagements…).
+            Ces éléments permettront au jury d’apprécier et d’évaluer votre démarche inclusive.<br></br><br></br>
+            Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
-         </p>
-        
-       </div>
-     </div>
+          </p>
+
+        </div>
+      </div>
 
       <div className="space-y-6">
         <div>
           <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Présentation de l’entreprise / établissement</h3>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Description générale de l’activité de votre entreprise / établissement *
+                Description générale de l’activité de votre entreprise / établissement *
               </label>
               <textarea
                 required
@@ -710,7 +710,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Description de la clientèle (localisation, type de clientèle) ou de votre activité (Fonction publique) *
+                Description de la clientèle (localisation, type de clientèle) ou de votre activité (Fonction publique) *
               </label>
               <textarea
                 required
@@ -725,7 +725,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Description de vos produits / votre prestation de service / (“produits”: provenance ou fabriqués par vous) / Vos missions *
+                Description de vos produits / votre prestation de service / (“produits”: provenance ou fabriqués par vous) / Vos missions *
               </label>
               <textarea
                 required
@@ -740,7 +740,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Quels sont vos modes de communication (carte de visite, presse écrite, réseaux sociaux, site internet, etc...)*
+                Quels sont vos modes de communication (carte de visite, presse écrite, réseaux sociaux, site internet, etc...)*
               </label>
               <textarea
                 required
@@ -755,7 +755,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Expliquez votre apport pour le territoire de la Martinique *
+                Expliquez votre apport pour le territoire de la Martinique (inclusion, stage, partenariat etc..)*
               </label>
               <textarea
                 required
@@ -800,7 +800,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Avez-vous amorcé une démarche de transition numérique ? *
+                Avez-vous amorcé une démarche de transition numérique ? *
               </label>
               <textarea
                 required
@@ -812,11 +812,11 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
               />
               <ErrorMessage fieldName="demarche_transition_numerique" />
             </div>
-<div> <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Inclusion du handicap</h3></div>
+            <div> <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Inclusion du handicap</h3></div>
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Comment avez-vous inclus la dimension du handicap au sein de l’entreprise / établissement (recrutement, action de sensibilisation) ? *
-              (Cette information sera affichée publiquement pour la présentation de la vidéo) *
+                Comment avez-vous inclus la dimension du handicap au sein de l’entreprise / établissement (action de sensibilisation, adaptation au poste de travail etc..) ? *
+                (Cette information sera affichée publiquement pour la présentation de la vidéo) *
               </label>
               <textarea
                 required
@@ -831,7 +831,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Quels sont vos besoins (matériel / financiers / ressources humaines) dans le cadre de l’inclusion du handicap au sein de votre établissement ?*
+                Quels sont vos besoins (matériel / financiers / ressources humaines) dans le cadre de l’inclusion du handicap au sein de votre établissement ?*
               </label>
               <textarea
                 required
@@ -846,7 +846,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Quel est le pourcentage de travailleurs en situation de handicap, au sein de votre structure ? *
+                Quel est le pourcentage de travailleurs en situation de handicap, au sein de votre structure ? *
               </label>
               <textarea
                 required
@@ -861,7 +861,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Avez-vous embouché en alternance, des travailleurs en situation handicap ? *
+                Avez-vous embouché en alternance, des travailleurs en situation handicap ? *
               </label>
               <textarea
                 required
@@ -876,7 +876,7 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Si vous avez choisi de faire appel à des entreprises adaptées ou établissements et services d’aide par le travail, expliquez pour quelles raisons ?*
+                Si vous avez choisi de faire appel à des entreprises adaptées ou établissements et services d’aide par le travail, expliquez pour quelles raisons ?*
               </label>
               <textarea
                 required
@@ -889,11 +889,11 @@ Remplissez l’ensemble des champs obligatoires avant de poursuivre.
               <ErrorMessage fieldName="collaboration_entreprises_adaptees" />
             </div>
             <div> <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Le concours “Les trophées des
-administrations & entreprises
-inclusives de Martinique” : Vos attentes</h3></div>
+              administrations & entreprises
+              inclusives de Martinique” : Vos attentes</h3></div>
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Pourquoi participer à ce concours ? *
+                Pourquoi participer à ce concours ? *
               </label>
               <textarea
                 required
@@ -908,7 +908,7 @@ inclusives de Martinique” : Vos attentes</h3></div>
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>
-              Quels seraient à votre avis vos axes de progrès (améliorations, freins, etc...) ? *
+                Quels seraient à votre avis vos axes de progrès (améliorations, freins, etc...) ? *
               </label>
               <textarea
                 required
@@ -944,7 +944,7 @@ inclusives de Martinique” : Vos attentes</h3></div>
         <h2 className="mb-4" style={{ color: '#DBB572' }}>
           Sélectionnez la ou les catégories qui correspondent le mieux à votre établissement :
         </h2>
-        
+
         <div data-field="categories_selectionnees" className="mt-3">
           {CATEGORIES.map((categorie, index) => (
             <label key={index} className="flex items-start space-x-3 p-4 rounded-lg cursor-pointer mt-3" style={{ border: validationErrors.categories_selectionnees ? '2px solid #ef4444' : '1px solid #DBB572', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
@@ -985,10 +985,10 @@ inclusives de Martinique” : Vos attentes</h3></div>
     const [uploadProgress, setUploadProgress] = useState(0)
     const [isUploading, setIsUploading] = useState(false)
     const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null)
-    
+
     // Récupérer l'URL de la vidéo depuis les données du formulaire si elle existe déjà
     const existingVideoUrl = watch('video_s3_url')
-    
+
     // Mettre à jour videoPreviewUrl si une vidéo existe déjà dans la base de données
     React.useEffect(() => {
       if (existingVideoUrl && !videoPreviewUrl) {
@@ -998,7 +998,7 @@ inclusives de Martinique” : Vos attentes</h3></div>
 
     const onDrop = async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0]
-      
+
       // Valider le fichier
       const validation = validateFile(file, 500, ['video/mp4', 'video/quicktime', 'video/x-msvideo'])
       if (!validation.valid) {
@@ -1007,22 +1007,22 @@ inclusives de Martinique” : Vos attentes</h3></div>
         })
         return
       }
-      
+
       setVideoFile(file)
       setIsUploading(true)
       setUploadProgress(0)
-      
+
       // Créer une URL de prévisualisation locale
       const localPreviewUrl = URL.createObjectURL(file)
       setVideoPreviewUrl(localPreviewUrl)
-      
+
       // Upload vers S3 via API avec progression
       let uploadToastId: string | number = ''
-      
+
       try {
         const result = await uploadFileToS3(
-          file, 
-          'videos', 
+          file,
+          'videos',
           participationId || undefined,
           (percentage) => {
             setUploadProgress(percentage)
@@ -1039,14 +1039,14 @@ inclusives de Martinique” : Vos attentes</h3></div>
             }
           }
         )
-        
+
         if (result.success && result.url) {
           setValue('video_s3_url', result.url)
-          
+
           // Sauvegarder automatiquement l'URL dans la base de données
           const currentData = { ...getValues(), video_s3_url: result.url }
           await saveParticipation(currentData)
-          
+
           toast.success('Vidéo uploadée avec succès !', {
             id: uploadToastId,
             description: `${file.name} - ${(file.size / 1024 / 1024).toFixed(2)} MB`
@@ -1078,21 +1078,29 @@ inclusives de Martinique” : Vos attentes</h3></div>
 
     return (
       <div className="space-y-6">
-        
+
 
         <div className="text-center mb-8">
-       <p className="text-lg font-semibold" style={{ backgroundColor: '#DBB572', color: '#10214B', width: 'max-content', padding: '3px 14px', margin: 'auto', borderRadius: '5px' }}>Étape 4</p>
-       <h1 className="text-3xl font-bold mb-4 mt-4 uppercase" style={{ color: '#DBB572' }}>Vidéo de présentation</h1>
-       <div className="text-center mb-8" style={{ backgroundColor: '#DBB572', color: '#10214B', padding: '40px', borderRadius: '20px' }}>
-         <p>
-         Déposez une <strong>vidéo</strong> présentant <strong>comment votre entreprise ou établissement intègre la dimension du handicap</strong>.<br></br>
-Cette vidéo servira à illustrer concrètement votre engagement auprès du jury et du public.
+          <p className="text-lg font-semibold" style={{ backgroundColor: '#DBB572', color: '#10214B', width: 'max-content', padding: '3px 14px', margin: 'auto', borderRadius: '5px' }}>Étape 4</p>
+          <h1 className="text-3xl font-bold mb-4 mt-4 uppercase" style={{ color: '#DBB572' }}>Vidéo de présentation</h1>
+          <div className="text-center mb-8" style={{ backgroundColor: '#DBB572', color: '#10214B', padding: '40px', borderRadius: '20px' }}>
+            <p>
+              Déposez une courte vidéo illustrant la façon dont votre entreprise ou établissement intègre la dimension du handicap dans son fonctionnement.<br></br>
+              Répondez de manière simple et sincère à la question :<br></br>
+              « Comment avez-vous inclus la dimension du handicap au sein de votre entreprise ou établissement ? »<br></br>
+              La vidéo doit aborder la ou les catégories pour lesquelles vous présentez votre candidature :<br></br>
+              <ul>
+                <li>Embauche de salari&eacute;&middot;e&middot;s en situation de handicap</li>
+                <li>Maintien dans l&apos;emploi</li>
+                <li>Embauche en alternance</li>
+                <li>Collaboration avec des Entreprises Adaptées ou ESAT</li>
+              </ul>
+              Si vous concourez dans plusieurs cat&eacute;gories, veillez &agrave; pr&eacute;senter l&apos;ensemble de vos actions dans une seule et m&ecirc;me vid&eacute;o.
+            </p>
 
-         </p>
-        
-         
-       </div>
-     </div>
+
+          </div>
+        </div>
 
         <div className="space-y-4">
           <div>
@@ -1103,12 +1111,11 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
 
             <div
               {...getVideoRootProps()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                isVideoDragActive ? 'bg-blue-50' : 'hover:bg-gray-50'
-              } ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
-              style={{ 
-                borderColor: validationErrors.video_s3_url ? '#ef4444' : '#DBB572', 
-                backgroundColor: isVideoDragActive ? 'rgba(219, 181, 114, 0.1)' : 'rgba(255, 255, 255, 0.05)' 
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isVideoDragActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                } ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
+              style={{
+                borderColor: validationErrors.video_s3_url ? '#ef4444' : '#DBB572',
+                backgroundColor: isVideoDragActive ? 'rgba(219, 181, 114, 0.1)' : 'rgba(255, 255, 255, 0.05)'
               }}
               data-field="video_s3_url"
             >
@@ -1137,7 +1144,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                   <span>{uploadProgress}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="h-2 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%`, backgroundColor: '#DBB572' }}
                   />
@@ -1160,7 +1167,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                   </video>
                   <div className="mt-2 text-center">
                     <p className="text-sm" style={{ color: '#DBB572' }}>
-                      ✓ Vidéo uploadée avec succès 
+                      ✓ Vidéo uploadée avec succès
                     </p>
                     {existingVideoUrl && (
                       <p className="text-xs mt-1" style={{ color: '#DBB572' }}>
@@ -1198,7 +1205,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
   const Etape5 = () => {
     const [attestationFile, setAttestationFile] = useState<File | null>(null)
     const [kbisFile, setKbisFile] = useState<File | null>(null)
-    
+
     // Récupérer les URLs des documents depuis les données du formulaire si elles existent déjà
     const existingAttestationUrl = watch('attestation_regularite_s3_url')
     const existingKbisUrl = watch('fiche_insee_kbis_s3_url')
@@ -1206,7 +1213,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
 
     const onDropAttestation = async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0]
-      
+
       // Valider le fichier
       const validation = validateFile(file, 10, ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'])
       if (!validation.valid) {
@@ -1215,24 +1222,24 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
         })
         return
       }
-      
+
       setAttestationFile(file)
-      
+
       // Upload vers S3
       const uploadToastId = toast.loading('Upload de l\'attestation en cours...', {
         description: `Fichier : ${file.name}`
       })
-      
+
       try {
         const result = await uploadFileToS3(file, 'documents', participationId || undefined)
-        
+
         if (result.success && result.url) {
           setValue('attestation_regularite_s3_url', result.url)
-          
+
           // Sauvegarder automatiquement l'URL dans la base de données
           const currentData = { ...getValues(), attestation_regularite_s3_url: result.url }
           await saveParticipation(currentData)
-          
+
           toast.success('Attestation uploadée avec succès !', {
             id: uploadToastId,
             description: `${file.name} - ${(file.size / 1024).toFixed(2)} KB`
@@ -1252,7 +1259,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
 
     const onDropKBIS = async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0]
-      
+
       // Valider le fichier
       const validation = validateFile(file, 10, ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'])
       if (!validation.valid) {
@@ -1261,24 +1268,24 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
         })
         return
       }
-      
+
       setKbisFile(file)
-      
+
       // Upload vers S3
       const uploadToastId = toast.loading('Upload du KBIS en cours...', {
         description: `Fichier : ${file.name}`
       })
-      
+
       try {
         const result = await uploadFileToS3(file, 'documents', participationId || undefined)
-        
+
         if (result.success && result.url) {
           setValue('fiche_insee_kbis_s3_url', result.url)
-          
+
           // Sauvegarder automatiquement l'URL dans la base de données
           const currentData = { ...getValues(), fiche_insee_kbis_s3_url: result.url }
           await saveParticipation(currentData)
-          
+
           toast.success('KBIS uploadé avec succès !', {
             id: uploadToastId,
             description: `${file.name} - ${(file.size / 1024).toFixed(2)} KB`
@@ -1316,19 +1323,19 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
 
     return (
       <div className="space-y-6">
-        
+
         <div className="text-center mb-8">
-       <p className="text-lg font-semibold" style={{ backgroundColor: '#DBB572', color: '#10214B', width: 'max-content', padding: '3px 14px', margin: 'auto', borderRadius: '5px' }}>Étape 5</p>
-       <h1 className="text-3xl font-bold mb-4 mt-4 uppercase" style={{ color: '#DBB572' }}>Documents et signature</h1>
-       <div className="text-center mb-8" style={{ backgroundColor: '#DBB572', color: '#10214B', padding: '40px', borderRadius: '20px' }}>
-         <p>
-          Avant de valider, vérifiez que toutes les pièces demandées sont jointes. Un dossier complet garantit la bonne prise en compte de votre participation.
-         </p>
-         
-        
-        
-       </div>
-     </div>
+          <p className="text-lg font-semibold" style={{ backgroundColor: '#DBB572', color: '#10214B', width: 'max-content', padding: '3px 14px', margin: 'auto', borderRadius: '5px' }}>Étape 5</p>
+          <h1 className="text-3xl font-bold mb-4 mt-4 uppercase" style={{ color: '#DBB572' }}>Documents et signature</h1>
+          <div className="text-center mb-8" style={{ backgroundColor: '#DBB572', color: '#10214B', padding: '40px', borderRadius: '20px' }}>
+            <p>
+              Avant de valider, vérifiez que toutes les pièces demandées sont jointes. Un dossier complet garantit la bonne prise en compte de votre participation.
+            </p>
+
+
+
+          </div>
+        </div>
 
         <div className="space-y-6">
           <div>
@@ -1395,7 +1402,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
 
           <div>
             <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Règlement et engagement</h3>
-            
+
             <div className="p-4 rounded-lg mb-4" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid #DBB572' }}>
               <p className="text-sm mb-2" style={{ color: 'white' }}>
                 Documents à consulter :
@@ -1425,9 +1432,9 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                 {existingSignatureUrl ? (
                   <div className="space-y-4">
                     <div className="text-center">
-                      <Image 
-                        src={existingSignatureUrl} 
-                        alt="Signature existante" 
+                      <Image
+                        src={existingSignatureUrl}
+                        alt="Signature existante"
                         width={400}
                         height={160}
                         className="mx-auto max-w-full h-40 object-contain bg-white rounded border"
@@ -1480,7 +1487,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
                     </div>
                   </div>
                 )}
-                
+
                 {!existingSignatureUrl && etapeActuelle === 5 && (
                   <div className="mt-2 text-center">
                     <p className="text-sm" style={{ color: '#DBB572' }}>
@@ -1518,7 +1525,7 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
             <span>{Math.round((etapeActuelle / 5) * 100)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="h-2 rounded-full transition-all duration-300"
               style={{ width: `${(etapeActuelle / 5) * 100}%`, backgroundColor: '#DBB572' }}
             />
@@ -1540,15 +1547,15 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
           >
             <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <mask id="mask0_121_33149" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
-                <rect width="24" height="24" transform="matrix(-1 0 0 1 24.5 0)" fill="#D9D9D9"/>
+                <rect width="24" height="24" transform="matrix(-1 0 0 1 24.5 0)" fill="#D9D9D9" />
               </mask>
               <g mask="url(#mask0_121_33149)">
-                <path d="M12.5 21C13.75 21 14.9208 20.7625 16.0125 20.2875C17.1042 19.8125 18.0542 19.1708 18.8625 18.3625C19.6708 17.5542 20.3125 16.6042 20.7875 15.5125C21.2625 14.4208 21.5 13.25 21.5 12C21.5 10.75 21.2625 9.57917 20.7875 8.4875C20.3125 7.39583 19.6708 6.44583 18.8625 5.6375C18.0542 4.82917 17.1042 4.1875 16.0125 3.7125C14.9208 3.2375 13.75 3 12.5 3V5C14.45 5 16.1042 5.67917 17.4625 7.0375C18.8208 8.39583 19.5 10.05 19.5 12C19.5 13.95 18.8208 15.6042 17.4625 16.9625C16.1042 18.3208 14.45 19 12.5 19V21ZM8.5 17L9.9 15.575L7.325 13H15.5V11H7.325L9.9 8.4L8.5 7L3.5 12L8.5 17Z" fill="white"/>
+                <path d="M12.5 21C13.75 21 14.9208 20.7625 16.0125 20.2875C17.1042 19.8125 18.0542 19.1708 18.8625 18.3625C19.6708 17.5542 20.3125 16.6042 20.7875 15.5125C21.2625 14.4208 21.5 13.25 21.5 12C21.5 10.75 21.2625 9.57917 20.7875 8.4875C20.3125 7.39583 19.6708 6.44583 18.8625 5.6375C18.0542 4.82917 17.1042 4.1875 16.0125 3.7125C14.9208 3.2375 13.75 3 12.5 3V5C14.45 5 16.1042 5.67917 17.4625 7.0375C18.8208 8.39583 19.5 10.05 19.5 12C19.5 13.95 18.8208 15.6042 17.4625 16.9625C16.1042 18.3208 14.45 19 12.5 19V21ZM8.5 17L9.9 15.575L7.325 13H15.5V11H7.325L9.9 8.4L8.5 7L3.5 12L8.5 17Z" fill="white" />
               </g>
             </svg>
             Précédent
           </button>
-          
+
           {etapeActuelle < 5 ? (
             <button
               onClick={handleNext}
@@ -1559,10 +1566,10 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
               {loading ? 'Sauvegarde...' : 'Suivant'}
               <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_183_6845" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
-                  <rect x="0.5" width="24" height="24" fill="#D9D9D9"/>
+                  <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
                 </mask>
                 <g mask="url(#mask0_183_6845)">
-                  <path d="M12.5 21C11.25 21 10.0792 20.7625 8.9875 20.2875C7.89583 19.8125 6.94583 19.1708 6.1375 18.3625C5.32917 17.5542 4.6875 16.6042 4.2125 15.5125C3.7375 14.4208 3.5 13.25 3.5 12C3.5 10.75 3.7375 9.57917 4.2125 8.4875C4.6875 7.39583 5.32917 6.44583 6.1375 5.6375C6.94583 4.82917 7.89583 4.1875 8.9875 3.7125C10.0792 3.2375 11.25 3 12.5 3V5C10.55 5 8.89583 5.67917 7.5375 7.0375C6.17917 8.39583 5.5 10.05 5.5 12C5.5 13.95 6.17917 15.6042 7.5375 16.9625C8.89583 18.3208 10.55 19 12.5 19V21ZM16.5 17L15.1 15.575L17.675 13H9.5V11H17.675L15.1 8.4L16.5 7L21.5 12L16.5 17Z" fill="#10214B"/>
+                  <path d="M12.5 21C11.25 21 10.0792 20.7625 8.9875 20.2875C7.89583 19.8125 6.94583 19.1708 6.1375 18.3625C5.32917 17.5542 4.6875 16.6042 4.2125 15.5125C3.7375 14.4208 3.5 13.25 3.5 12C3.5 10.75 3.7375 9.57917 4.2125 8.4875C4.6875 7.39583 5.32917 6.44583 6.1375 5.6375C6.94583 4.82917 7.89583 4.1875 8.9875 3.7125C10.0792 3.2375 11.25 3 12.5 3V5C10.55 5 8.89583 5.67917 7.5375 7.0375C6.17917 8.39583 5.5 10.05 5.5 12C5.5 13.95 6.17917 15.6042 7.5375 16.9625C8.89583 18.3208 10.55 19 12.5 19V21ZM16.5 17L15.1 15.575L17.675 13H9.5V11H17.675L15.1 8.4L16.5 7L21.5 12L16.5 17Z" fill="#10214B" />
                 </g>
               </svg>
             </button>
@@ -1576,10 +1583,10 @@ Cette vidéo servira à illustrer concrètement votre engagement auprès du jury
               {loading ? 'Envoi...' : "Valider l'inscription"}
               <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_183_6845_submit" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
-                  <rect x="0.5" width="24" height="24" fill="#D9D9D9"/>
+                  <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
                 </mask>
                 <g mask="url(#mask0_183_6845_submit)">
-                  <path d="M12.5 21C11.25 21 10.0792 20.7625 8.9875 20.2875C7.89583 19.8125 6.94583 19.1708 6.1375 18.3625C5.32917 17.5542 4.6875 16.6042 4.2125 15.5125C3.7375 14.4208 3.5 13.25 3.5 12C3.5 10.75 3.7375 9.57917 4.2125 8.4875C4.6875 7.39583 5.32917 6.44583 6.1375 5.6375C6.94583 4.82917 7.89583 4.1875 8.9875 3.7125C10.0792 3.2375 11.25 3 12.5 3V5C10.55 5 8.89583 5.67917 7.5375 7.0375C6.17917 8.39583 5.5 10.05 5.5 12C5.5 13.95 6.17917 15.6042 7.5375 16.9625C8.89583 18.3208 10.55 19 12.5 19V21ZM16.5 17L15.1 15.575L17.675 13H9.5V11H17.675L15.1 8.4L16.5 7L21.5 12L16.5 17Z" fill="#10214B"/>
+                  <path d="M12.5 21C11.25 21 10.0792 20.7625 8.9875 20.2875C7.89583 19.8125 6.94583 19.1708 6.1375 18.3625C5.32917 17.5542 4.6875 16.6042 4.2125 15.5125C3.7375 14.4208 3.5 13.25 3.5 12C3.5 10.75 3.7375 9.57917 4.2125 8.4875C4.6875 7.39583 5.32917 6.44583 6.1375 5.6375C6.94583 4.82917 7.89583 4.1875 8.9875 3.7125C10.0792 3.2375 11.25 3 12.5 3V5C10.55 5 8.89583 5.67917 7.5375 7.0375C6.17917 8.39583 5.5 10.05 5.5 12C5.5 13.95 6.17917 15.6042 7.5375 16.9625C8.89583 18.3208 10.55 19 12.5 19V21ZM16.5 17L15.1 15.575L17.675 13H9.5V11H17.675L15.1 8.4L16.5 7L21.5 12L16.5 17Z" fill="#10214B" />
                 </g>
               </svg>
             </button>

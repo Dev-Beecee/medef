@@ -39,7 +39,7 @@ export default function CategoriesSection() {
           }}
           className="max-w-2xl mx-auto"
         >
-          Les Trophées récompensent les structures engagées dans une ou <br /> plusieurs de ces catégories :
+          Ce concours récompense les structures engagées dans une ou <br /> plusieurs de ces catégories :
         </p>
 
         {/* Ligne 3 - 4 bulles */}

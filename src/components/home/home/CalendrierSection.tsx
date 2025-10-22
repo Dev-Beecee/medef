@@ -24,7 +24,7 @@ export default function CalendrierSection() {
 
         {/* Trois colonnes */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-          
+
           {/* Étape 1 */}
           <div className="flex flex-col items-center space-y-4">
             <CalendarHeart size={48} color="#DBB572" />
@@ -37,7 +37,7 @@ export default function CalendrierSection() {
                 lineHeight: "130%",
               }}
             >
-              2 novembre
+              4 novembre
             </h3>
             <p
               style={{
@@ -64,7 +64,7 @@ export default function CalendrierSection() {
                 lineHeight: "130%",
               }}
             >
-              Du 3 au 13 novembre
+              Du 5 au 13 novembre
             </h3>
             <p
               style={{
