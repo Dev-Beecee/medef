@@ -32,6 +32,12 @@ export default function FormulaireParticipation() {
   const [isPacteDialogOpen, setIsPacteDialogOpen] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const signatureRef = useRef<SignatureCanvas>(null)
+  
+  // États pour la recherche par email
+  const [showEmailSearch, setShowEmailSearch] = useState(true)
+  const [searchEmail, setSearchEmail] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+  const [participationStatus, setParticipationStatus] = useState<'none' | 'draft' | 'submitted'>('none')
 
   // React Hook Form - Utiliser watch uniquement pour les champs spécifiques
   const { register, getValues, setValue, watch } = useForm<Partial<ParticipationData>>({
@@ -198,6 +204,86 @@ export default function FormulaireParticipation() {
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error)
       throw error
+    }
+  }
+
+  // Fonction pour rechercher une participation existante par email
+  const searchExistingParticipation = async (email: string) => {
+    if (!email || !email.includes('@')) {
+      toast.error('Veuillez saisir une adresse email valide')
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const { data, error } = await supabase
+        .from('participations')
+        .select('*')
+        .eq('email', email.toLowerCase().trim())
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
+      
+      if (data) {
+        setParticipationId(data.id)
+        
+        // Déterminer le statut de la participation
+        if (data.formulaire_complete && data.statut === 'en attente') {
+          setParticipationStatus('submitted')
+          toast.info('Une participation a déjà été soumise avec cet email. Vous ne pouvez pas la modifier.')
+          return
+        } else if (data.statut === 'draft' || !data.formulaire_complete) {
+          setParticipationStatus('draft')
+          setEtapeActuelle(data.etape_actuelle || 1)
+          
+          // Pré-remplir le formulaire avec les données existantes
+          Object.keys(data).forEach(key => {
+            const typedKey = key as keyof ParticipationData
+            if (data[typedKey] !== null && data[typedKey] !== undefined) {
+              setValue(typedKey, data[typedKey])
+            }
+          })
+          
+          toast.success('Participation en brouillon trouvée ! Vous pouvez reprendre où vous vous êtes arrêté.')
+          setShowEmailSearch(false)
+        }
+      } else {
+        setParticipationStatus('none')
+        toast.info('Aucune participation trouvée pour cet email. Vous pouvez commencer une nouvelle participation.')
+        setShowEmailSearch(false)
+      }
+    } catch (error) {
+      console.error('Erreur recherche participation:', error)
+      toast.error('Erreur lors de la recherche de votre participation')
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  // Fonction pour sauvegarder la participation en brouillon
+  const saveDraftParticipation = async () => {
+    setLoading(true)
+    try {
+      const currentData = { 
+        ...getValues(), 
+        etape_actuelle: etapeActuelle,
+        statut: 'draft',
+        formulaire_complete: false
+      }
+      
+      await saveParticipation(currentData)
+      toast.success('Participation sauvegardée en brouillon !', {
+        description: 'Vous pouvez reprendre votre participation plus tard en saisissant votre email.'
+      })
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde en brouillon:', error)
+      toast.error('Erreur lors de la sauvegarde', {
+        description: 'Veuillez vérifier votre connexion et réessayer.'
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -1505,6 +1591,16 @@ export default function FormulaireParticipation() {
   }
 
   const renderEtape = () => {
+    // Si une participation est déjà soumise, ne pas afficher le formulaire
+    if (participationStatus === 'submitted') {
+      return null
+    }
+    
+    // Si on est en train de rechercher et qu'aucune participation n'a été trouvée, ne pas afficher le formulaire
+    if (showEmailSearch && participationStatus === 'none') {
+      return null
+    }
+    
     switch (etapeActuelle) {
       case 1: return <Etape1 />
       case 2: return <Etape2 />
@@ -1518,52 +1614,137 @@ export default function FormulaireParticipation() {
   return (
     <div className="min-h-screen py-8" style={{ backgroundColor: '#10214B' }}>
       <div className="max-w-4xl mx-auto px-4">
-        {/* Barre de progression */}
-        <div className="mb-8">
-          <div className="flex justify-between text-sm font-bold mb-2" style={{ color: '#DBB572' }}>
-            <span>Étape {etapeActuelle} sur 5</span>
-            <span>{Math.round((etapeActuelle / 5) * 100)}%</span>
+        {/* Barre de progression - affichée seulement si le formulaire est visible */}
+        {(!showEmailSearch || participationStatus === 'draft') && participationStatus !== 'submitted' && (
+          <div className="mb-8">
+            <div className="flex justify-between text-sm font-bold mb-2" style={{ color: '#DBB572' }}>
+              <span>Étape {etapeActuelle} sur 5</span>
+              <span>{Math.round((etapeActuelle / 5) * 100)}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="h-2 rounded-full transition-all duration-300"
+                style={{ width: `${(etapeActuelle / 5) * 100}%`, backgroundColor: '#DBB572' }}
+              />
+            </div>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(etapeActuelle / 5) * 100}%`, backgroundColor: '#DBB572' }}
-            />
+        )}
+
+        {/* Section de recherche par email */}
+        {showEmailSearch && (
+          <div className="mb-8 p-6 rounded-lg" style={{ backgroundColor: 'rgba(219, 181, 114, 0.1)', border: '2px solid #DBB572' }}>
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-semibold mb-2" style={{ color: '#DBB572' }}>
+                Reprendre une participation existante
+              </h3>
+              <p className="text-sm" style={{ color: 'white' }}>
+                Si vous avez déjà commencé à remplir votre participation, saisissez votre adresse email pour la récupérer et reprendre où vous vous êtes arrêté.
+              </p>
+            </div>
+            
+            <div className="flex gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Votre adresse email"
+                value={searchEmail}
+                onChange={(e) => setSearchEmail(e.target.value)}
+                className="flex-1 p-3 rounded-md bg-white"
+                style={{ border: '1px solid #DBB572' }}
+                disabled={isSearching}
+              />
+              <button
+                onClick={() => searchExistingParticipation(searchEmail)}
+                disabled={isSearching || !searchEmail}
+                className="px-6 py-3 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#DBB572', color: '#10214B' }}
+              >
+                {isSearching ? 'Recherche...' : 'Rechercher'}
+              </button>
+            </div>
+            
+            <div className="text-center mt-3">
+              <button
+                onClick={() => setShowEmailSearch(false)}
+                className="text-sm underline"
+                style={{ color: '#DBB572' }}
+              >
+                Commencer une nouvelle participation
+              </button>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Message si participation déjà soumise */}
+        {participationStatus === 'submitted' && (
+          <div className="mb-8 p-6 rounded-lg text-center" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '2px solid #ef4444' }}>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: '#ef4444' }}>
+              Participation déjà enregistrée
+            </h3>
+            <p className="text-sm" style={{ color: 'white' }}>
+              Une participation a déjà été soumise avec cet email. Vous ne pouvez pas modifier une participation déjà enregistrée.
+            </p>
+            <button
+              onClick={() => {
+                setParticipationStatus('none')
+                setSearchEmail('')
+                setShowEmailSearch(true)
+              }}
+              className="mt-3 px-4 py-2 rounded-md"
+              style={{ backgroundColor: '#DBB572', color: '#10214B' }}
+            >
+              Utiliser un autre email
+            </button>
+          </div>
+        )}
 
         {/* Contenu de l'étape */}
         <div className="rounded-lg shadow-sm p-8" style={{ backgroundColor: 'transparent' }}>
           {renderEtape()}
         </div>
 
-        {/* Navigation */}
-        <div className="flex justify-between mt-8">
-          <button
-            onClick={handlePrevious}
-            disabled={etapeActuelle === 1}
-            className="px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            style={{ border: '1px solid rgba(255, 255, 255, 0.19)', color: 'white', backgroundColor: 'rgba(255, 255, 255, 0.16)' }}
-          >
-            <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <mask id="mask0_121_33149" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
-                <rect width="24" height="24" transform="matrix(-1 0 0 1 24.5 0)" fill="#D9D9D9" />
-              </mask>
-              <g mask="url(#mask0_121_33149)">
-                <path d="M12.5 21C13.75 21 14.9208 20.7625 16.0125 20.2875C17.1042 19.8125 18.0542 19.1708 18.8625 18.3625C19.6708 17.5542 20.3125 16.6042 20.7875 15.5125C21.2625 14.4208 21.5 13.25 21.5 12C21.5 10.75 21.2625 9.57917 20.7875 8.4875C20.3125 7.39583 19.6708 6.44583 18.8625 5.6375C18.0542 4.82917 17.1042 4.1875 16.0125 3.7125C14.9208 3.2375 13.75 3 12.5 3V5C14.45 5 16.1042 5.67917 17.4625 7.0375C18.8208 8.39583 19.5 10.05 19.5 12C19.5 13.95 18.8208 15.6042 17.4625 16.9625C16.1042 18.3208 14.45 19 12.5 19V21ZM8.5 17L9.9 15.575L7.325 13H15.5V11H7.325L9.9 8.4L8.5 7L3.5 12L8.5 17Z" fill="white" />
-              </g>
-            </svg>
-            Précédent
-          </button>
-
-          {etapeActuelle < 5 ? (
+        {/* Navigation - affichée seulement si le formulaire est visible */}
+        {(!showEmailSearch || participationStatus === 'draft') && participationStatus !== 'submitted' && (
+          <div className="flex justify-between items-center mt-8">
             <button
-              onClick={handleNext}
-              disabled={loading}
-              className="px-6 py-3 rounded-lg disabled:opacity-50 flex items-center gap-2"
-              style={{ backgroundColor: '#DBB572', color: '#10214B', border: '1px solid white' }}
+              onClick={handlePrevious}
+              disabled={etapeActuelle === 1}
+              className="px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              style={{ border: '1px solid rgba(255, 255, 255, 0.19)', color: 'white', backgroundColor: 'rgba(255, 255, 255, 0.16)' }}
             >
-              {loading ? 'Sauvegarde...' : 'Suivant'}
+              <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <mask id="mask0_121_33149" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+                  <rect width="24" height="24" transform="matrix(-1 0 0 1 24.5 0)" fill="#D9D9D9" />
+                </mask>
+                <g mask="url(#mask0_121_33149)">
+                  <path d="M12.5 21C13.75 21 14.9208 20.7625 16.0125 20.2875C17.1042 19.8125 18.0542 19.1708 18.8625 18.3625C19.6708 17.5542 20.3125 16.6042 20.7875 15.5125C21.2625 14.4208 21.5 13.25 21.5 12C21.5 10.75 21.2625 9.57917 20.7875 8.4875C20.3125 7.39583 19.6708 6.44583 18.8625 5.6375C18.0542 4.82917 17.1042 4.1875 16.0125 3.7125C14.9208 3.2375 13.75 3 12.5 3V5C14.45 5 16.1042 5.67917 17.4625 7.0375C18.8208 8.39583 19.5 10.05 19.5 12C19.5 13.95 18.8208 15.6042 17.4625 16.9625C16.1042 18.3208 14.45 19 12.5 19V21ZM8.5 17L9.9 15.575L7.325 13H15.5V11H7.325L9.9 8.4L8.5 7L3.5 12L8.5 17Z" fill="white" />
+                </g>
+              </svg>
+              Précédent
+            </button>
+
+            {/* Bouton Enregistrer en brouillon */}
+            <button
+              onClick={saveDraftParticipation}
+              disabled={loading}
+              className="px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              style={{ border: '1px solid #DBB572', color: '#DBB572', backgroundColor: 'rgba(219, 181, 114, 0.1)' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16L21 8V19C21 20.1046 20.1046 21 19 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M17 21V13H7V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M7 3V8H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {loading ? 'Sauvegarde...' : 'Enregistrer en brouillon'}
+            </button>
+
+            {etapeActuelle < 5 ? (
+              <button
+                onClick={handleNext}
+                disabled={loading}
+                className="px-6 py-3 rounded-lg disabled:opacity-50 flex items-center gap-2"
+                style={{ backgroundColor: '#DBB572', color: '#10214B', border: '1px solid white' }}
+              >
+                {loading ? 'Sauvegarde...' : 'Suivant'}
               <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_183_6845" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
                   <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
@@ -1591,7 +1772,8 @@ export default function FormulaireParticipation() {
               </svg>
             </button>
           )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Dialog Pacte d'engagement */}
