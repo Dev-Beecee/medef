@@ -1,4 +1,10 @@
 import VoteComponent from '@/components/VoteComponent';
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Vote - Trophées des Entreprises et Administrations Inclusives 2025",
+  description: "Votez pour les entreprises et administrations les plus inclusives de Martinique. Découvrez les initiatives handicap et soutenez l'inclusion jusqu'au 13 novembre 2025.",
+}
 
 export default function VotePage() {
   return (

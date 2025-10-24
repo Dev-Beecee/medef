@@ -35,10 +35,10 @@ const poppins = localFont({
 
 export const metadata: Metadata = {
   title: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
-  description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 2 novembre.",
+  description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 4 novembre 2025.",
   openGraph: {
     title: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
-    description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 2 novembre.",
+    description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 4 novembre 2025.",
     url: "https://seeph-medef-martinique.fr",
     siteName: "SEEPH MEDEF Martinique",
     images: [
