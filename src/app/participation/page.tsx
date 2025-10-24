@@ -109,7 +109,7 @@ export default function FormulaireParticipation() {
       case 'capital_social':
         return !value ? 'Le capital social est obligatoire' : ''
       case 'effectif_2023':
-        return !value ? 'L\'effectif au 30 septembre 2023 est obligatoire' : ''
+        return !value ? 'L\'effectif au 30 décembre 2024 est obligatoire' : ''
       case 'activite_principale':
         return !stringValue || stringValue.trim() === '' ? 'L\'activité principale est obligatoire' : ''
       case 'description_activite':
@@ -623,7 +623,7 @@ export default function FormulaireParticipation() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Effectif de l&apos;établissement au 30 septembre 2023 *</label>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'white' }}>Effectif de l&apos;établissement au 30 décembre 2024 *</label>
             <input
               type="number"
               required
