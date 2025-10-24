@@ -179,6 +179,7 @@ export type Database = {
           effectif_2023: number | null
           email: string
           embauche_accompagnement_handicap: string | null
+          fichiers_complementaires_s3_urls: string[] | null
           etape_actuelle: number | null
           fiche_insee_kbis_s3_url: string | null
           forme_juridique: string | null
@@ -228,6 +229,7 @@ export type Database = {
           effectif_2023?: number | null
           email: string
           embauche_accompagnement_handicap?: string | null
+          fichiers_complementaires_s3_urls?: string[] | null
           etape_actuelle?: number | null
           fiche_insee_kbis_s3_url?: string | null
           forme_juridique?: string | null
@@ -277,6 +279,7 @@ export type Database = {
           effectif_2023?: number | null
           email?: string
           embauche_accompagnement_handicap?: string | null
+          fichiers_complementaires_s3_urls?: string[] | null
           etape_actuelle?: number | null
           fiche_insee_kbis_s3_url?: string | null
           forme_juridique?: string | null

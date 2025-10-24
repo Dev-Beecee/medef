@@ -1287,6 +1287,214 @@ export default function FormulaireParticipation() {
     )
   }
 
+  // Composant pour l'upload de fichiers complémentaires
+  const ComplementaryFilesUploader = () => {
+    const [complementaryFiles, setComplementaryFiles] = useState<File[]>([])
+    const [uploadingFiles, setUploadingFiles] = useState<Set<string>>(new Set())
+    const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
+
+    // Récupérer les URLs existantes depuis les données du formulaire
+    const existingUrls = getValues('fichiers_complementaires_s3_urls') || []
+
+    const onDrop = async (acceptedFiles: File[]) => {
+      const newFiles = [...complementaryFiles, ...acceptedFiles]
+      setComplementaryFiles(newFiles)
+
+      // Upload chaque fichier
+      for (const file of acceptedFiles) {
+        const fileId = `${file.name}-${file.size}-${Date.now()}`
+        setUploadingFiles(prev => new Set(prev).add(fileId))
+        setUploadProgress(prev => ({ ...prev, [fileId]: 0 }))
+
+        // Valider le fichier
+        const validation = validateFile(file, 10, ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+        if (!validation.valid) {
+          toast.error(`Fichier invalide: ${file.name}`, {
+            description: validation.error
+          })
+          setUploadingFiles(prev => {
+            const newSet = new Set(prev)
+            newSet.delete(fileId)
+            return newSet
+          })
+          continue
+        }
+
+        try {
+          const result = await uploadFileToS3(
+            file,
+            'documents',
+            participationId || undefined,
+            (percentage) => {
+              setUploadProgress(prev => ({ ...prev, [fileId]: percentage }))
+            }
+          )
+
+          if (result.success && result.url) {
+            const updatedUrls = [...existingUrls, result.url]
+            setValue('fichiers_complementaires_s3_urls', updatedUrls)
+
+            // Sauvegarder automatiquement dans la base de données
+            const currentData = { ...getValues(), fichiers_complementaires_s3_urls: updatedUrls }
+            await saveParticipation(currentData)
+
+            toast.success(`Fichier uploadé: ${file.name}`)
+          } else {
+            throw new Error(result.error || 'Erreur inconnue')
+          }
+        } catch (error) {
+          console.error('Erreur upload fichier complémentaire:', error)
+          toast.error(`Erreur lors de l'upload de ${file.name}`)
+        } finally {
+          setUploadingFiles(prev => {
+            const newSet = new Set(prev)
+            newSet.delete(fileId)
+            return newSet
+          })
+          setUploadProgress(prev => {
+            const newProgress = { ...prev }
+            delete newProgress[fileId]
+            return newProgress
+          })
+        }
+      }
+    }
+
+    const removeFile = async (index: number) => {
+      let fileName = ''
+      
+      if (index < existingUrls.length) {
+        // Supprimer un fichier existant (déjà uploadé)
+        fileName = `Document complémentaire ${index + 1}`
+        const updatedUrls = existingUrls.filter((_: string, i: number) => i !== index)
+        setValue('fichiers_complementaires_s3_urls', updatedUrls)
+        
+        const currentData = { ...getValues(), fichiers_complementaires_s3_urls: updatedUrls }
+        await saveParticipation(currentData)
+      } else {
+        // Supprimer un nouveau fichier (pas encore uploadé)
+        const fileIndex = index - existingUrls.length
+        const fileToRemove = complementaryFiles[fileIndex]
+        fileName = fileToRemove.name
+        const newFiles = complementaryFiles.filter((_, i) => i !== fileIndex)
+        setComplementaryFiles(newFiles)
+      }
+
+      toast.info(`Fichier supprimé: ${fileName}`)
+    }
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+      onDrop,
+      accept: {
+        'application/pdf': ['.pdf'],
+        'image/*': ['.jpg', '.jpeg', '.png'],
+        'application/msword': ['.doc'],
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+      },
+      multiple: true
+    })
+
+    return (
+      <div className="space-y-4">
+        {/* Zone de drop */}
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+            isDragActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+          }`}
+          style={{
+            borderColor: '#DBB572',
+            backgroundColor: isDragActive ? 'rgba(219, 181, 114, 0.1)' : 'rgba(255, 255, 255, 0.05)'
+          }}
+        >
+          <input {...getInputProps()} />
+          <div className="space-y-2">
+            <svg className="mx-auto h-12 w-12" stroke="#DBB572" fill="none" viewBox="0 0 48 48">
+              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <p className="text-sm" style={{ color: 'white' }}>
+              {isDragActive ? 'Déposez vos fichiers ici...' : 'Glissez-déposez vos fichiers ici, ou cliquez pour sélectionner'}
+            </p>
+            <p className="text-xs" style={{ color: '#DBB572' }}>
+              Formats acceptés : PDF, JPG, PNG, DOC, DOCX - Taille max : 10 MB par fichier
+            </p>
+          </div>
+        </div>
+
+        {/* Liste des fichiers */}
+        {(complementaryFiles.length > 0 || existingUrls.length > 0) && (
+          <div className="space-y-2">
+            <h4 className="text-md font-semibold" style={{ color: '#DBB572' }}>Fichiers ajoutés :</h4>
+            <div className="space-y-2">
+              {/* Fichiers existants */}
+              {existingUrls.map((url: string, index: number) => (
+                <div key={`existing-${index}`} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid #DBB572' }}>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5" style={{ color: '#DBB572' }} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-sm" style={{ color: 'white' }}>
+                      Document complémentaire {index + 1}
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: '#DBB572', color: '#10214B' }}>
+                      ✓ Uploadé
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => removeFile(index)}
+                    className="text-red-400 hover:text-red-300 text-sm"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              ))}
+
+              {/* Nouveaux fichiers */}
+              {complementaryFiles.map((file, index) => {
+                const fileId = `${file.name}-${file.size}-${Date.now()}`
+                const isUploading = uploadingFiles.has(fileId)
+                const progress = uploadProgress[fileId] || 0
+                const globalIndex = existingUrls.length + index
+
+                return (
+                  <div key={`new-${index}`} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid #DBB572' }}>
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5" style={{ color: '#DBB572' }} fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-sm" style={{ color: 'white' }}>
+                        {file.name}
+                      </span>
+                      <span className="text-xs">
+                        ({(file.size / 1024).toFixed(1)} KB)
+                      </span>
+                      {isUploading ? (
+                        <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: '#DBB572', color: '#10214B' }}>
+                          Upload: {progress}%
+                        </span>
+                      ) : (
+                        <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: '#DBB572', color: '#10214B' }}>
+                          ✓ Uploadé
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => removeFile(globalIndex)}
+                      className="text-red-400 hover:text-red-300 text-sm"
+                      disabled={isUploading}
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   // ÉTAPE 5: Documents et signature
   const Etape5 = () => {
     const [attestationFile, setAttestationFile] = useState<File | null>(null)
@@ -1484,6 +1692,15 @@ export default function FormulaireParticipation() {
                 <ErrorMessage fieldName="fiche_insee_kbis_s3_url" />
               </div>
             </div>
+          </div>
+
+          {/* Section fichiers complémentaires */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Fichiers complémentaires (optionnel)</h3>
+            <p className="text-sm mb-4" style={{ color: 'white' }}>
+              Vous pouvez ajouter des documents complémentaires qui appuient votre candidature (certificats, attestations, photos, etc.)
+            </p>
+            <ComplementaryFilesUploader />
           </div>
 
           <div>
