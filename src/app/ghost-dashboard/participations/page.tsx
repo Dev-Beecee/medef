@@ -75,8 +75,10 @@ type Participation = {
   signature_image_s3_url: string | null
   attestation_dirigeant_s3_url: string | null
   acceptation_reglement: boolean | null
+  consentement_candidature: boolean
   etape_actuelle: number | null
   formulaire_complete: boolean | null
+  fichiers_complementaires_s3_urls: string[] | null
   created_at: string | null
   updated_at: string | null
   user_id: string | null
@@ -249,8 +251,10 @@ export default function ParticipationsPage() {
       'Catégories sélectionnées',
       'Autorisation diffusion vidéo',
       'Acceptation règlement',
+      'Consentement candidature',
       'Étape actuelle',
       'Formulaire complet',
+      'Fichiers complémentaires',
       'Statut',
       'Date création',
       'Date mise à jour'
@@ -293,8 +297,10 @@ export default function ParticipationsPage() {
       participation.categories_selectionnees?.map(cat => getCategoryDisplayName(cat)).join('; ') || '',
       participation.autorisation_diffusion_video ? 'Oui' : 'Non',
       participation.acceptation_reglement ? 'Oui' : 'Non',
+      participation.consentement_candidature ? 'Oui' : 'Non',
       participation.etape_actuelle || '',
       participation.formulaire_complete ? 'Oui' : 'Non',
+      participation.fichiers_complementaires_s3_urls?.length || 0,
       participation.statut || '',
       participation.created_at || '',
       participation.updated_at || ''
@@ -682,7 +688,7 @@ export default function ParticipationsPage() {
                             Voir plus
                           </button>
                         </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle>Détails de la participation</DialogTitle>
                           <DialogDescription>
@@ -742,6 +748,11 @@ export default function ParticipationsPage() {
                               <InfoItem label="Description de l'activité" value={selectedParticipation.description_activite} />
                               <InfoItem label="Clientèle" value={selectedParticipation.description_clientele} />
                               <InfoItem label="Produits et services" value={selectedParticipation.description_produits_services} />
+                              <InfoItem label="Modes de communication" value={selectedParticipation.modes_communication} />
+                              <InfoItem label="Support Martinique" value={selectedParticipation.support_martinique} />
+                              <InfoItem label="Points forts" value={selectedParticipation.points_forts} />
+                              <InfoItem label="Points faibles" value={selectedParticipation.points_faibles} />
+                              <InfoItem label="Démarche transition numérique" value={selectedParticipation.demarche_transition_numerique} />
                             </div>
 
                             {/* Inclusion handicap */}
@@ -752,6 +763,13 @@ export default function ParticipationsPage() {
                               <InfoItem label="Pourcentage travailleurs" value={selectedParticipation.pourcentage_travailleurs_handicap} />
                               <InfoItem label="Accompagnement embauche" value={selectedParticipation.embauche_accompagnement_handicap} />
                               <InfoItem label="Collaboration entreprises adaptées" value={selectedParticipation.collaboration_entreprises_adaptees} />
+                            </div>
+
+                            {/* Concours et attentes */}
+                            <div className="space-y-2">
+                              <h3 className="text-lg font-semibold border-b pb-2">Concours et attentes</h3>
+                              <InfoItem label="Raison participation" value={selectedParticipation.raison_participation} />
+                              <InfoItem label="Axes de progrès" value={selectedParticipation.axes_progres} />
                             </div>
 
                             {/* Catégories */}
@@ -776,6 +794,22 @@ export default function ParticipationsPage() {
                               </div>
                             </div>
 
+                            {/* Fichiers complémentaires */}
+                            {selectedParticipation.fichiers_complementaires_s3_urls && selectedParticipation.fichiers_complementaires_s3_urls.length > 0 && (
+                              <div className="space-y-2">
+                                <h3 className="text-lg font-semibold border-b pb-2">Fichiers complémentaires</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                  {selectedParticipation.fichiers_complementaires_s3_urls.map((url, index) => (
+                                    <DocumentLink 
+                                      key={index}
+                                      label={`Document complémentaire ${index + 1}`} 
+                                      url={url} 
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
                             {/* Statut formulaire */}
                             <div className="space-y-2">
                               <h3 className="text-lg font-semibold border-b pb-2">État du formulaire</h3>
@@ -784,6 +818,7 @@ export default function ParticipationsPage() {
                                 <InfoItem label="Formulaire complet" value={selectedParticipation.formulaire_complete ? 'Oui' : 'Non'} />
                                 <InfoItem label="Acceptation règlement" value={selectedParticipation.acceptation_reglement ? 'Oui' : 'Non'} />
                                 <InfoItem label="Autorisation diffusion vidéo" value={selectedParticipation.autorisation_diffusion_video ? 'Oui' : 'Non'} />
+                                <InfoItem label="Consentement candidature" value={selectedParticipation.consentement_candidature ? 'Oui' : 'Non'} />
                               </div>
                             </div>
                           </div>
