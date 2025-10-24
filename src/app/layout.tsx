@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
-    description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 2 novembre.",
+    description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 4 novembre.",
     images: ["/seeph-partage.jpg"],
   },
   metadataBase: new URL("https://seeph-medef-martinique.fr"),

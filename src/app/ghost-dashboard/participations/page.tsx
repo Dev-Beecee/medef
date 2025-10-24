@@ -29,7 +29,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Eye, Loader2, Search, Filter, Download, FileText, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Eye, Loader2, Search, Filter, Download, FileText, ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react'
 import { exportParticipationsToPDF, exportSingleParticipationToPDF } from '@/lib/pdfExport'
 import { ExportProgressDialog } from '@/components/ExportProgressDialog'
 
@@ -191,6 +191,23 @@ export default function ParticipationsPage() {
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Erreur lors de la mise à jour du statut')
+    }
+  }
+
+  const deleteParticipation = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('participations')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success('Participation supprimée avec succès')
+      fetchParticipations()
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la suppression de la participation')
     }
   }
 
@@ -771,6 +788,42 @@ export default function ParticipationsPage() {
                             </div>
                           </div>
                         )}
+                      </DialogContent>
+                    </Dialog>
+                    
+                    {/* Bouton de suppression avec confirmation */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="flex items-center gap-1"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Supprimer
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Confirmer la suppression</DialogTitle>
+                          <DialogDescription>
+                            Êtes-vous sûr de vouloir supprimer la participation de <strong>{participation.prenom_candidat} {participation.nom_candidat}</strong> de l&apos;établissement <strong>{participation.nom_etablissement}</strong> ?
+                            <br />
+                            <br />
+                            Cette action est irréversible et supprimera définitivement toutes les données associées à cette participation.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex justify-end gap-2 mt-4">
+                          <DialogTrigger asChild>
+                            <Button variant="outline">Annuler</Button>
+                          </DialogTrigger>
+                          <Button 
+                            variant="destructive"
+                            onClick={() => deleteParticipation(participation.id)}
+                          >
+                            Supprimer définitivement
+                          </Button>
+                        </div>
                       </DialogContent>
                     </Dialog>
                     </div>
