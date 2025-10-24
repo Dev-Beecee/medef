@@ -35,10 +35,10 @@ const poppins = localFont({
 
 export const metadata: Metadata = {
   title: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
-  description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 4 novembre 2025.",
+  description: "Concours d'inclusion handicap en Martinique. Valorisez votre engagement ! Candidature ouverte jusqu'au 4 novembre 2025. Entreprises et administrations inclusives.",
   openGraph: {
     title: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
-    description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 4 novembre 2025.",
+    description: "Concours d'inclusion handicap en Martinique. Valorisez votre engagement ! Candidature ouverte jusqu'au 4 novembre 2025. Entreprises et administrations inclusives.",
     url: "https://seeph-medef-martinique.fr",
     siteName: "SEEPH MEDEF Martinique",
     images: [
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Trophées des Entreprises et Administrations Inclusives 2025 – Martinique",
-    description: "Valorisez votre engagement pour l'inclusion en Martinique ! Participez aux Trophées des Entreprises et Administrations Inclusives avant le 4 novembre.",
+    description: "Concours d'inclusion handicap en Martinique. Valorisez votre engagement ! Candidature ouverte jusqu'au 4 novembre 2025. Entreprises et administrations inclusives.",
     images: ["/seeph-partage.jpg"],
   },
   metadataBase: new URL("https://seeph-medef-martinique.fr"),

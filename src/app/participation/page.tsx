@@ -15,12 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: "Candidature - Trophées des Entreprises et Administrations Inclusives 2025",
-  description: "Candidaturez aux Trophées des Entreprises et Administrations Inclusives de Martinique. Formulaire de participation en 5 étapes pour valoriser votre engagement handicap.",
-}
 
 type ParticipationData = TablesInsert<'participations'>
 
