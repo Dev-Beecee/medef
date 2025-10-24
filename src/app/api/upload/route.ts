@@ -116,11 +116,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Limiter la taille maximale des uploads (500 MB)
+// Limiter la taille maximale des uploads (5 GB)
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '500mb',
+      sizeLimit: '5gb',
     },
   },
 }

@@ -28,7 +28,7 @@ if (fileSizeMB < 100) {
     Key: fileName,
     Body: file,
     ContentType: file.type,
-    ChecksumAlgorithm: 'CRC32', // ✅ Spécifier CRC32
+    ChecksumAlgorithm: "CRC32", // ✅ Spécifier CRC32
   });
   await s3Client.send(command);
 } else {
@@ -40,7 +40,7 @@ if (fileSizeMB < 100) {
       Key: fileName,
       Body: file,
       ContentType: file.type,
-      ChecksumAlgorithm: 'CRC32', // ✅ Spécifier CRC32 pour toutes les parts
+      ChecksumAlgorithm: "CRC32", // ✅ Spécifier CRC32 pour toutes les parts
     },
     partSize: 1024 * 1024 * 10,
   });
@@ -49,6 +49,7 @@ if (fileSizeMB < 100) {
 ```
 
 **Explication** :
+
 - AWS S3 SDK v3 initialise automatiquement les uploads multipart avec CRC32
 - Chaque part doit envoyer son checksum `x-amz-checksum-crc32`
 - En spécifiant explicitement `ChecksumAlgorithm: 'CRC32'`, le SDK calcule et envoie le checksum pour chaque part
@@ -236,15 +237,15 @@ Fichier invalide: Le fichier est trop volumineux
 **Solution :**
 Respecter les limites :
 
-- **Vidéos** : 500 MB max, formats `.mp4`, `.mov`, `.avi`
+- **Vidéos** : 5 GB max, formats `.mp4`, `.mov`, `.avi`
 - **Documents** : 10 MB max, formats `.pdf`, `.jpg`, `.jpeg`, `.png`
 
 **Modifier les limites :**
 Dans `src/lib/s3-upload.ts`, fonction `validateFile()` :
 
 ```typescript
-// Exemple : augmenter la limite vidéo à 1 GB
-const validation = validateFile(file, 1000, [...])
+// Exemple : augmenter la limite vidéo à 10 GB
+const validation = validateFile(file, 10000, [...])
 ```
 
 ### 7. Variables d'environnement non chargées

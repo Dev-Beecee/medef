@@ -3,6 +3,7 @@
 ## 🎯 Problème identifié
 
 L'erreur `InvalidRequest: The upload was created using a crc32 checksum` se produit car :
+
 - AWS S3 SDK v3 initialise automatiquement les uploads multipart avec un algorithme CRC32
 - Chaque part doit envoyer son checksum `x-amz-checksum-crc32`
 - Sans spécifier explicitement `ChecksumAlgorithm: 'CRC32'`, le SDK ne calcule pas et n'envoie pas les checksums
@@ -41,7 +42,7 @@ export async function uploadFileToS3(
       Key: fileName,
       Body: file,
       ContentType: file.type,
-      ChecksumAlgorithm: 'CRC32', // ✅ Spécifier explicitement
+      ChecksumAlgorithm: "CRC32", // ✅ Spécifier explicitement
     });
     await s3Client.send(command);
   } else {
@@ -53,7 +54,7 @@ export async function uploadFileToS3(
         Key: fileName,
         Body: file,
         ContentType: file.type,
-        ChecksumAlgorithm: 'CRC32', // ✅ Spécifier pour toutes les parts
+        ChecksumAlgorithm: "CRC32", // ✅ Spécifier pour toutes les parts
       },
       partSize: 1024 * 1024 * 10, // 10MB
       queueSize: 4,
@@ -64,6 +65,7 @@ export async function uploadFileToS3(
 ```
 
 **Clé de la solution** : `ChecksumAlgorithm: 'CRC32'`
+
 - Pour PutObject : calcule et envoie le checksum
 - Pour Upload multipart : calcule et envoie le checksum pour chaque part
 
@@ -86,15 +88,15 @@ export async function uploadFileToS3(
 - **Reprise automatique** en cas d'échec
 - **Upload par morceaux** de 10 MB
 - **Parfait pour** :
-  - Vidéos longues (100-500 MB)
+  - Vidéos longues (100 MB - 5 GB)
 
 ## 🔧 Configuration actuelle
 
 ### Limites de validation
 
 ```typescript
-// Vidéos : 500 MB max
-validateFile(file, 500, ["video/mp4", "video/quicktime", "video/x-msvideo"]);
+// Vidéos : 5 GB max
+validateFile(file, 5000, ["video/mp4", "video/quicktime", "video/x-msvideo"]);
 
 // Documents : 10 MB max
 validateFile(file, 10, [

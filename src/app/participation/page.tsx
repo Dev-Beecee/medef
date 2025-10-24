@@ -1000,7 +1000,7 @@ export default function FormulaireParticipation() {
       const file = acceptedFiles[0]
 
       // Valider le fichier
-      const validation = validateFile(file, 500, ['video/mp4', 'video/quicktime', 'video/x-msvideo'])
+      const validation = validateFile(file, 5000, ['video/mp4', 'video/quicktime', 'video/x-msvideo'])
       if (!validation.valid) {
         toast.error('Fichier invalide', {
           description: validation.error
@@ -1106,7 +1106,7 @@ export default function FormulaireParticipation() {
           <div>
             <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Téléchargez votre vidéo</h3>
             <p className="text-sm mb-4" style={{ color: 'white' }}>
-              Formats acceptés : MP4, MOV, AVI - Taille maximale : 500 MB
+              Formats acceptés : MP4, MOV, AVI - Taille maximale : 5 GB
             </p>
 
             <div

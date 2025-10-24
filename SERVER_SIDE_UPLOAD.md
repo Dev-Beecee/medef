@@ -151,7 +151,7 @@ Vous pouvez **supprimer ou laisser** la configuration CORS, elle n'est plus util
 | **CORS nécessaire**      | ✅ Oui            | ❌ Non                     |
 | **Validation**           | ⚠️ Contournable   | ✅ Fiable                  |
 | **Progression**          | ✅ XMLHttpRequest | ✅ XMLHttpRequest          |
-| **Taille max upload**    | ~500 MB           | ~500 MB                    |
+| **Taille max upload**    | ~5 GB             | ~5 GB                      |
 | **Logs**                 | ❌ Client only    | ✅ Serveur + Client        |
 | **Bande passante**       | 1x (client → S3)  | 2x (client → serveur → S3) |
 
@@ -216,7 +216,7 @@ Upload: 100%
 ➡️ Redémarrer le serveur Next.js
 
 **2. "Payload too large"**
-➡️ Fichier > 500 MB
+➡️ Fichier > 5 GB
 ➡️ Augmenter `sizeLimit` dans `route.ts`
 
 **3. "Network error"**
