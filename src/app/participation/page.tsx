@@ -1859,7 +1859,7 @@ export default function FormulaireParticipation() {
               </p>
             </div>
             
-            <div className="flex gap-3 max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <input
                 type="email"
                 placeholder="Votre adresse email"
@@ -1872,7 +1872,7 @@ export default function FormulaireParticipation() {
               <button
                 onClick={() => searchExistingParticipation(searchEmail)}
                 disabled={isSearching || !searchEmail}
-                className="px-6 py-3 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-6 py-3 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: '#DBB572', color: '#10214B' }}
               >
                 {isSearching ? 'Recherche...' : 'Rechercher'}
@@ -1921,29 +1921,68 @@ export default function FormulaireParticipation() {
 
         {/* Navigation - affichée seulement si le formulaire est visible */}
         {(!showEmailSearch || participationStatus === 'draft') && participationStatus !== 'submitted' && (
-          <div className="flex justify-between items-center mt-8">
-            <button
-              onClick={handlePrevious}
-              disabled={etapeActuelle === 1}
-              className="px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              style={{ border: '1px solid rgba(255, 255, 255, 0.19)', color: 'white', backgroundColor: 'rgba(255, 255, 255, 0.16)' }}
-            >
-              <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <mask id="mask0_121_33149" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
-                  <rect width="24" height="24" transform="matrix(-1 0 0 1 24.5 0)" fill="#D9D9D9" />
-                </mask>
-                <g mask="url(#mask0_121_33149)">
-                  <path d="M12.5 21C13.75 21 14.9208 20.7625 16.0125 20.2875C17.1042 19.8125 18.0542 19.1708 18.8625 18.3625C19.6708 17.5542 20.3125 16.6042 20.7875 15.5125C21.2625 14.4208 21.5 13.25 21.5 12C21.5 10.75 21.2625 9.57917 20.7875 8.4875C20.3125 7.39583 19.6708 6.44583 18.8625 5.6375C18.0542 4.82917 17.1042 4.1875 16.0125 3.7125C14.9208 3.2375 13.75 3 12.5 3V5C14.45 5 16.1042 5.67917 17.4625 7.0375C18.8208 8.39583 19.5 10.05 19.5 12C19.5 13.95 18.8208 15.6042 17.4625 16.9625C16.1042 18.3208 14.45 19 12.5 19V21ZM8.5 17L9.9 15.575L7.325 13H15.5V11H7.325L9.9 8.4L8.5 7L3.5 12L8.5 17Z" fill="white" />
-                </g>
-              </svg>
-              Précédent
-            </button>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:justify-between items-center mt-8">
+            {/* Ligne 1 sur mobile : Précédent et Suivant */}
+            <div className="flex justify-between items-center w-full sm:w-auto gap-3 sm:gap-0">
+              <button
+                onClick={handlePrevious}
+                disabled={etapeActuelle === 1}
+                className="px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                style={{ border: '1px solid rgba(255, 255, 255, 0.19)', color: 'white', backgroundColor: 'rgba(255, 255, 255, 0.16)' }}
+              >
+                <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <mask id="mask0_121_33149" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+                    <rect width="24" height="24" transform="matrix(-1 0 0 1 24.5 0)" fill="#D9D9D9" />
+                  </mask>
+                  <g mask="url(#mask0_121_33149)">
+                    <path d="M12.5 21C13.75 21 14.9208 20.7625 16.0125 20.2875C17.1042 19.8125 18.0542 19.1708 18.8625 18.3625C19.6708 17.5542 20.3125 16.6042 20.7875 15.5125C21.2625 14.4208 21.5 13.25 21.5 12C21.5 10.75 21.2625 9.57917 20.7875 8.4875C20.3125 7.39583 19.6708 6.44583 18.8625 5.6375C18.0542 4.82917 17.1042 4.1875 16.0125 3.7125C14.9208 3.2375 13.75 3 12.5 3V5C14.45 5 16.1042 5.67917 17.4625 7.0375C18.8208 8.39583 19.5 10.05 19.5 12C19.5 13.95 18.8208 15.6042 17.4625 16.9625C16.1042 18.3208 14.45 19 12.5 19V21ZM8.5 17L9.9 15.575L7.325 13H15.5V11H7.325L9.9 8.4L8.5 7L3.5 12L8.5 17Z" fill="white" />
+                  </g>
+                </svg>
+                Précédent
+              </button>
 
-            {/* Bouton Enregistrer en brouillon */}
+              {etapeActuelle < 5 ? (
+                <button
+                  onClick={handleNext}
+                  disabled={loading}
+                  className="px-6 py-3 rounded-lg disabled:opacity-50 flex items-center gap-2"
+                  style={{ backgroundColor: '#DBB572', color: '#10214B', border: '1px solid white' }}
+                >
+                  {loading ? 'Sauvegarde...' : 'Suivant'}
+                  <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_183_6845" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+                      <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
+                    </mask>
+                    <g mask="url(#mask0_183_6845)">
+                      <path d="M12.5 21C11.25 21 10.0792 20.7625 8.9875 20.2875C7.89583 19.8125 6.94583 19.1708 6.1375 18.3625C5.32917 17.5542 4.6875 16.6042 4.2125 15.5125C3.7375 14.4208 3.5 13.25 3.5 12C3.5 10.75 3.7375 9.57917 4.2125 8.4875C4.6875 7.39583 5.32917 6.44583 6.1375 5.6375C6.94583 4.82917 7.89583 4.1875 8.9875 3.7125C10.0792 3.2375 11.25 3 12.5 3V5C10.55 5 8.89583 5.67917 7.5375 7.0375C6.17917 8.39583 5.5 10.05 5.5 12C5.5 13.95 6.17917 15.6042 7.5375 16.9625C8.89583 18.3208 10.55 19 12.5 19V21ZM16.5 17L15.1 15.575L17.675 13H9.5V11H17.675L15.1 8.4L16.5 7L21.5 12L16.5 17Z" fill="#10214B" />
+                    </g>
+                  </svg>
+                </button>
+              ) : (
+                <button
+                  onClick={handleFinalSubmit}
+                  disabled={loading || !getValues('signature_image_s3_url')}
+                  className="px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  style={{ backgroundColor: '#DBB572', color: '#10214B', border: '1px solid white' }}
+                >
+                  {loading ? 'Envoi...' : "Valider l'inscription"}
+                  <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_183_6845_submit" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
+                      <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
+                    </mask>
+                    <g mask="url(#mask0_183_6845_submit)">
+                      <path d="M12.5 21C11.25 21 10.0792 20.7625 8.9875 20.2875C7.89583 19.8125 6.94583 19.1708 6.1375 18.3625C5.32917 17.5542 4.6875 16.6042 4.2125 15.5125C3.7375 14.4208 3.5 13.25 3.5 12C3.5 10.75 3.7375 9.57917 4.2125 8.4875C4.6875 7.39583 5.32917 6.44583 6.1375 5.6375C6.94583 4.82917 7.89583 4.1875 8.9875 3.7125C10.0792 3.2375 11.25 3 12.5 3V5C10.55 5 8.89583 5.67917 7.5375 7.0375C6.17917 8.39583 5.5 10.05 5.5 12C5.5 13.95 6.17917 15.6042 7.5375 16.9625C8.89583 18.3208 10.55 19 12.5 19V21ZM16.5 17L15.1 15.575L17.675 13H9.5V11H17.675L15.1 8.4L16.5 7L21.5 12L16.5 17Z" fill="#10214B" />
+                    </g>
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            {/* Bouton Enregistrer en brouillon - centré en dessous sur mobile, au centre sur desktop */}
             <button
               onClick={saveDraftParticipation}
               disabled={loading}
-              className="px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 w-full sm:w-auto justify-center"
               style={{ border: '1px solid #DBB572', color: '#DBB572', backgroundColor: 'rgba(219, 181, 114, 0.1)' }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1953,42 +1992,6 @@ export default function FormulaireParticipation() {
               </svg>
               {loading ? 'Sauvegarde...' : 'Enregistrer en brouillon'}
             </button>
-
-            {etapeActuelle < 5 ? (
-              <button
-                onClick={handleNext}
-                disabled={loading}
-                className="px-6 py-3 rounded-lg disabled:opacity-50 flex items-center gap-2"
-                style={{ backgroundColor: '#DBB572', color: '#10214B', border: '1px solid white' }}
-              >
-                {loading ? 'Sauvegarde...' : 'Suivant'}
-              <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <mask id="mask0_183_6845" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
-                  <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
-                </mask>
-                <g mask="url(#mask0_183_6845)">
-                  <path d="M12.5 21C11.25 21 10.0792 20.7625 8.9875 20.2875C7.89583 19.8125 6.94583 19.1708 6.1375 18.3625C5.32917 17.5542 4.6875 16.6042 4.2125 15.5125C3.7375 14.4208 3.5 13.25 3.5 12C3.5 10.75 3.7375 9.57917 4.2125 8.4875C4.6875 7.39583 5.32917 6.44583 6.1375 5.6375C6.94583 4.82917 7.89583 4.1875 8.9875 3.7125C10.0792 3.2375 11.25 3 12.5 3V5C10.55 5 8.89583 5.67917 7.5375 7.0375C6.17917 8.39583 5.5 10.05 5.5 12C5.5 13.95 6.17917 15.6042 7.5375 16.9625C8.89583 18.3208 10.55 19 12.5 19V21ZM16.5 17L15.1 15.575L17.675 13H9.5V11H17.675L15.1 8.4L16.5 7L21.5 12L16.5 17Z" fill="#10214B" />
-                </g>
-              </svg>
-            </button>
-          ) : (
-            <button
-              onClick={handleFinalSubmit}
-              disabled={loading || !getValues('signature_image_s3_url')}
-              className="px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              style={{ backgroundColor: '#DBB572', color: '#10214B', border: '1px solid white' }}
-            >
-              {loading ? 'Envoi...' : "Valider l'inscription"}
-              <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <mask id="mask0_183_6845_submit" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="25" height="24">
-                  <rect x="0.5" width="24" height="24" fill="#D9D9D9" />
-                </mask>
-                <g mask="url(#mask0_183_6845_submit)">
-                  <path d="M12.5 21C11.25 21 10.0792 20.7625 8.9875 20.2875C7.89583 19.8125 6.94583 19.1708 6.1375 18.3625C5.32917 17.5542 4.6875 16.6042 4.2125 15.5125C3.7375 14.4208 3.5 13.25 3.5 12C3.5 10.75 3.7375 9.57917 4.2125 8.4875C4.6875 7.39583 5.32917 6.44583 6.1375 5.6375C6.94583 4.82917 7.89583 4.1875 8.9875 3.7125C10.0792 3.2375 11.25 3 12.5 3V5C10.55 5 8.89583 5.67917 7.5375 7.0375C6.17917 8.39583 5.5 10.05 5.5 12C5.5 13.95 6.17917 15.6042 7.5375 16.9625C8.89583 18.3208 10.55 19 12.5 19V21ZM16.5 17L15.1 15.575L17.675 13H9.5V11H17.675L15.1 8.4L16.5 7L21.5 12L16.5 17Z" fill="#10214B" />
-                </g>
-              </svg>
-            </button>
-          )}
           </div>
         )}
       </div>
