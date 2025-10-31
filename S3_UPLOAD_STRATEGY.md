@@ -95,8 +95,8 @@ export async function uploadFileToS3(
 ### Limites de validation
 
 ```typescript
-// Vidéos : 5 GB max
-validateFile(file, 5000, ["video/mp4", "video/quicktime", "video/x-msvideo"]);
+// Vidéos : 5 GB max, format MP4 uniquement
+validateFile(file, 5000, ["video/mp4"]);
 
 // Documents : 10 MB max
 validateFile(file, 10, [

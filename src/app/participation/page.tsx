@@ -1086,7 +1086,7 @@ export default function FormulaireParticipation() {
       const file = acceptedFiles[0]
 
       // Valider le fichier
-      const validation = validateFile(file, 5000, ['video/mp4', 'video/quicktime', 'video/x-msvideo'])
+      const validation = validateFile(file, 5000, ['video/mp4'])
       if (!validation.valid) {
         toast.error('Fichier invalide', {
           description: validation.error
@@ -1157,7 +1157,7 @@ export default function FormulaireParticipation() {
     const { getRootProps: getVideoRootProps, getInputProps: getVideoInputProps, isDragActive: isVideoDragActive } = useDropzone({
       onDrop,
       accept: {
-        'video/*': ['.mp4', '.mov', '.avi']
+        'video/mp4': ['.mp4']
       },
       maxFiles: 1
     })

@@ -237,7 +237,7 @@ Fichier invalide: Le fichier est trop volumineux
 **Solution :**
 Respecter les limites :
 
-- **Vidéos** : 5 GB max, formats `.mp4`, `.mov`, `.avi`
+- **Vidéos** : 5 GB max, format `.mp4` uniquement
 - **Documents** : 10 MB max, formats `.pdf`, `.jpg`, `.jpeg`, `.png`
 
 **Modifier les limites :**
