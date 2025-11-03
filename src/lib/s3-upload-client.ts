@@ -12,7 +12,8 @@ export interface UploadResult {
 }
 
 /**
- * Upload un fichier vers S3 via l'API route Next.js
+ * Upload un fichier vers S3 directement via Presigned URL
+ * Plus rapide et contourne les limites de timeout de Vercel
  * @param file Le fichier à uploader
  * @param folder Le dossier dans le bucket (ex: 'videos', 'documents', 'signatures')
  * @param participationId L'ID de la participation pour organiser les fichiers
@@ -26,19 +27,37 @@ export async function uploadFileToS3(
   onProgress?: (percentage: number) => void
 ): Promise<UploadResult> {
   try {
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('folder', folder)
-    if (participationId) {
-      formData.append('participationId', participationId)
+    // Étape 1 : Obtenir une Presigned URL depuis notre API
+    const presignedResponse = await fetch('/api/generate-presigned-url', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fileName: file.name,
+        fileType: file.type,
+        folder,
+        participationId,
+      }),
+    })
+
+    if (!presignedResponse.ok) {
+      const error = await presignedResponse.json()
+      return {
+        success: false,
+        error: error.error || 'Erreur lors de la génération de l\'URL d\'upload',
+      }
     }
 
-    // Utiliser XMLHttpRequest pour avoir la progression
-    return new Promise<UploadResult>((resolve, reject) => {
+    const { presignedUrl, fileUrl } = await presignedResponse.json()
+
+    // Étape 2 : Upload direct vers S3 avec la Presigned URL
+    return new Promise<UploadResult>((resolve) => {
       const xhr = new XMLHttpRequest()
 
-      // Configurer un timeout long pour les gros fichiers (30 minutes)
-      xhr.timeout = 30 * 60 * 1000 // 30 minutes en millisecondes
+      // Pas de limite de timeout car upload direct vers S3
+      // On met quand même un timeout raisonnable (2 heures pour vidéos très volumineuses)
+      xhr.timeout = 2 * 60 * 60 * 1000 // 2 heures
 
       // Écouter la progression de l'upload
       xhr.upload.addEventListener('progress', (event) => {
@@ -51,25 +70,17 @@ export async function uploadFileToS3(
       // Gérer la réponse
       xhr.addEventListener('load', () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const response = JSON.parse(xhr.responseText)
-            resolve(response)
-          } catch {
-            reject(new Error('Erreur de parsing de la réponse'))
-          }
+          resolve({
+            success: true,
+            url: fileUrl,
+            size: file.size,
+            type: file.type,
+          })
         } else {
-          try {
-            const errorResponse = JSON.parse(xhr.responseText)
-            resolve({
-              success: false,
-              error: errorResponse.error || `Erreur HTTP ${xhr.status}`,
-            })
-          } catch {
-            resolve({
-              success: false,
-              error: `Erreur HTTP ${xhr.status}`,
-            })
-          }
+          resolve({
+            success: false,
+            error: `Erreur S3 : ${xhr.status} - ${xhr.statusText}`,
+          })
         }
       })
 
@@ -77,27 +88,15 @@ export async function uploadFileToS3(
       xhr.addEventListener('timeout', () => {
         resolve({
           success: false,
-          error: 'Le délai d\'upload a expiré. Veuillez vérifier votre connexion et réessayer avec un fichier plus petit.',
+          error: 'Le délai d\'upload a expiré. Veuillez vérifier votre connexion et réessayer.',
         })
       })
 
       // Gérer les erreurs réseau
-      xhr.addEventListener('error', (event: ProgressEvent<XMLHttpRequestEventTarget>) => {
-        let errorMessage = 'Erreur réseau lors de l\'upload'
-        
-        // Détecter les erreurs DNS spécifiques dans le contexte
-        try {
-          const eventStr = JSON.stringify(event)
-          if (eventStr.includes('EAI_AGAIN') || eventStr.includes('getaddrinfo')) {
-            errorMessage = 'Erreur de connexion réseau (DNS). Vérifiez votre connexion Internet et réessayez.'
-          }
-        } catch {
-          // Si JSON.stringify échoue, on garde le message par défaut
-        }
-        
+      xhr.addEventListener('error', () => {
         resolve({
           success: false,
-          error: errorMessage,
+          error: 'Erreur réseau lors de l\'upload. Vérifiez votre connexion Internet et réessayez.',
         })
       })
 
@@ -109,9 +108,10 @@ export async function uploadFileToS3(
         })
       })
 
-      // Envoyer la requête
-      xhr.open('POST', '/api/upload')
-      xhr.send(formData)
+      // Envoyer le fichier directement à S3 avec PUT
+      xhr.open('PUT', presignedUrl)
+      xhr.setRequestHeader('Content-Type', file.type)
+      xhr.send(file)
     })
   } catch (error) {
     console.error('Erreur lors de l\'upload:', error)
