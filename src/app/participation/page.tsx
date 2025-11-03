@@ -1192,7 +1192,7 @@ export default function FormulaireParticipation() {
           <div>
             <h3 className="text-lg font-semibold mb-4" style={{ color: '#DBB572' }}>Téléchargez votre vidéo</h3>
             <p className="text-sm mb-4" style={{ color: 'white' }}>
-              Formats acceptés : MP4, MOV, AVI - Taille maximale : 5 GB
+              Format accepté : MP4 - Taille maximale : 5 GB
             </p>
 
             <div
