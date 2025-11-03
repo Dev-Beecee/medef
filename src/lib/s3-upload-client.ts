@@ -37,6 +37,9 @@ export async function uploadFileToS3(
     return new Promise<UploadResult>((resolve, reject) => {
       const xhr = new XMLHttpRequest()
 
+      // Configurer un timeout long pour les gros fichiers (30 minutes)
+      xhr.timeout = 30 * 60 * 1000 // 30 minutes en millisecondes
+
       // Écouter la progression de l'upload
       xhr.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable && onProgress) {
@@ -70,11 +73,31 @@ export async function uploadFileToS3(
         }
       })
 
-      // Gérer les erreurs réseau
-      xhr.addEventListener('error', () => {
+      // Gérer le timeout
+      xhr.addEventListener('timeout', () => {
         resolve({
           success: false,
-          error: 'Erreur réseau lors de l\'upload',
+          error: 'Le délai d\'upload a expiré. Veuillez vérifier votre connexion et réessayer avec un fichier plus petit.',
+        })
+      })
+
+      // Gérer les erreurs réseau
+      xhr.addEventListener('error', (event: ProgressEvent<XMLHttpRequestEventTarget>) => {
+        let errorMessage = 'Erreur réseau lors de l\'upload'
+        
+        // Détecter les erreurs DNS spécifiques dans le contexte
+        try {
+          const eventStr = JSON.stringify(event)
+          if (eventStr.includes('EAI_AGAIN') || eventStr.includes('getaddrinfo')) {
+            errorMessage = 'Erreur de connexion réseau (DNS). Vérifiez votre connexion Internet et réessayez.'
+          }
+        } catch {
+          // Si JSON.stringify échoue, on garde le message par défaut
+        }
+        
+        resolve({
+          success: false,
+          error: errorMessage,
         })
       })
 

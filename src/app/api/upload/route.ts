@@ -116,13 +116,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Limiter la taille maximale des uploads (5 GB)
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '5gb',
-    },
-  },
-}
+// Configuration pour les gros uploads
+// Note: Dans Next.js App Router, la configuration bodyParser ne fonctionne pas
+// La limite est configurée dans next.config.ts
+export const maxDuration = 1800 // 30 minutes (durée max d'exécution de la fonction)
 
 
