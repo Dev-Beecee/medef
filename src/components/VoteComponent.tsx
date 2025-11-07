@@ -233,6 +233,37 @@ const VoteComponent: React.FC = () => {
 
   const handleNext = () => {
     if (currentStep < 5) {
+      // Vérifier qu'au moins un vote a été fait pour la catégorie actuelle
+      const currentCategoryIndex = currentStep - 1;
+      const currentCategory = categories[currentCategoryIndex];
+      
+      if (!currentCategory) {
+        toast.error('Erreur : catégorie introuvable');
+        return;
+      }
+      
+      // Vérifier si la catégorie a des candidatures
+      const categoryParticipations = participations.filter(participation => 
+        participation.categories_selectionnees.includes(currentCategory.name)
+      );
+      
+      // Si la catégorie n'a pas de candidatures, on peut passer à l'étape suivante
+      if (categoryParticipations.length === 0) {
+        setCurrentStep(currentStep + 1);
+        return;
+      }
+      
+      // Vérifier s'il y a au moins un vote pour cette catégorie
+      const votesForCurrentCategory = currentVotes.filter(
+        vote => vote.categoryId === currentCategory.id && vote.voteValue === 1
+      );
+      
+      if (votesForCurrentCategory.length === 0) {
+        toast.error(`Veuillez sélectionner au moins une candidature dans la catégorie "${currentCategory.name}" avant de continuer`);
+        return;
+      }
+      
+      // Si tout est OK, passer à l'étape suivante
       setCurrentStep(currentStep + 1);
     }
   };
@@ -247,6 +278,30 @@ const VoteComponent: React.FC = () => {
   const submitVotes = async () => {
     if (!emailCheck.email) {
       toast.error('Veuillez saisir votre email');
+      return;
+    }
+
+    // Vérifier qu'au moins un vote a été fait pour chaque catégorie qui a des candidatures
+    const categoriesWithoutVotes: string[] = [];
+    categories.forEach(category => {
+      // Vérifier si la catégorie a des candidatures
+      const categoryParticipations = participations.filter(participation => 
+        participation.categories_selectionnees.includes(category.name)
+      );
+      
+      // Si la catégorie a des candidatures, vérifier qu'il y a au moins un vote
+      if (categoryParticipations.length > 0) {
+        const votesForCategory = currentVotes.filter(
+          vote => vote.categoryId === category.id && vote.voteValue === 1
+        );
+        if (votesForCategory.length === 0) {
+          categoriesWithoutVotes.push(category.name);
+        }
+      }
+    });
+
+    if (categoriesWithoutVotes.length > 0) {
+      toast.error(`Veuillez sélectionner au moins une candidature dans ${categoriesWithoutVotes.length === 1 ? 'la catégorie' : 'les catégories'} : ${categoriesWithoutVotes.join(', ')}`);
       return;
     }
 
