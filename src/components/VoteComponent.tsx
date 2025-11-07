@@ -41,6 +41,27 @@ interface VoteSummary {
   votes: { [categoryId: number]: number };
 }
 
+interface SupabaseCategory {
+  id: number;
+  name: string;
+  description?: string | null;
+  order_index?: number | null;
+  created_at?: string | null;
+}
+
+interface SupabaseParticipation {
+  id: string;
+  nom_etablissement: string | null;
+  nom_candidat: string | null;
+  prenom_candidat: string | null;
+  video_s3_url: string | null;
+  categories_selectionnees: string[] | null;
+  statut: string | null;
+  activite_principale: string | null;
+  inclusion_handicap_approche: string | null;
+  [key: string]: unknown;
+}
+
 const VoteComponent: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [participations, setParticipations] = useState<Participation[]>([]);
@@ -94,7 +115,7 @@ const VoteComponent: React.FC = () => {
         // Si erreur, on crée les catégories depuis les participations
         if (participationsData && participationsData.length > 0) {
           const uniqueCategories = new Set<string>();
-          participationsData.forEach((participation: any) => {
+          participationsData.forEach((participation: SupabaseParticipation) => {
             if (participation.categories_selectionnees && Array.isArray(participation.categories_selectionnees)) {
               participation.categories_selectionnees.forEach((cat: string) => {
                 uniqueCategories.add(cat);
@@ -115,7 +136,7 @@ const VoteComponent: React.FC = () => {
         console.log('Table vote_categories est vide, création des catégories depuis les participations');
         if (participationsData && participationsData.length > 0) {
           const uniqueCategories = new Set<string>();
-          participationsData.forEach((participation: any) => {
+          participationsData.forEach((participation: SupabaseParticipation) => {
             if (participation.categories_selectionnees && Array.isArray(participation.categories_selectionnees)) {
               participation.categories_selectionnees.forEach((cat: string) => {
                 uniqueCategories.add(cat);
@@ -152,11 +173,11 @@ const VoteComponent: React.FC = () => {
               .order('id');
             
             if (!reloadError && newCategoriesData) {
-              categoriesToUse = newCategoriesData.map((cat: any, index: number) => ({
+              categoriesToUse = newCategoriesData.map((cat: SupabaseCategory, index: number) => ({
                 id: cat.id,
                 name: cat.name,
                 description: cat.description || '',
-                order_index: cat.order_index !== undefined ? cat.order_index : index + 1,
+                order_index: (cat.order_index !== undefined && cat.order_index !== null) ? cat.order_index : index + 1,
                 created_at: cat.created_at
               }));
             }
@@ -164,11 +185,11 @@ const VoteComponent: React.FC = () => {
         }
       } else {
         // Mapper les données pour s'assurer que description et order_index existent
-        categoriesToUse = categoriesData.map((cat: any, index: number) => ({
+        categoriesToUse = categoriesData.map((cat: SupabaseCategory, index: number) => ({
           id: cat.id,
           name: cat.name,
           description: cat.description || '',
-          order_index: cat.order_index !== undefined ? cat.order_index : index + 1,
+          order_index: (cat.order_index !== undefined && cat.order_index !== null) ? cat.order_index : index + 1,
           created_at: cat.created_at
         }));
       }
