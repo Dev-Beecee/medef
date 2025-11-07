@@ -60,16 +60,6 @@ const VoteComponent: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Récupérer les catégories
-      const { data: categoriesData, error: categoriesError } = await supabase
-        .from('vote_categories')
-        .select('*')
-        .order('order_index');
-
-      if (categoriesError) throw categoriesError;
-      // Toutes les catégories ont description et order_index
-      setCategories((categoriesData || []) as Category[]);
-
       // Récupérer les participations validées avec vidéos
       const { data: participationsData, error: participationsError } = await supabase
         .from('participations')
@@ -80,7 +70,111 @@ const VoteComponent: React.FC = () => {
 
       if (participationsError) throw participationsError;
       // Les participations filtrées ont toujours video_s3_url non null
+      console.log('=== PARTICIPATIONS LOADED ===', participationsData);
+      console.log('Number of participations:', participationsData?.length);
+      if (participationsData && participationsData.length > 0) {
+        console.log('First participation categories:', participationsData[0].categories_selectionnees);
+      }
       setParticipations((participationsData || []) as Participation[]);
+
+      // Récupérer les catégories
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('vote_categories')
+        .select('*')
+        .order('id');
+
+      console.log('=== CATEGORIES REQUEST ===');
+      console.log('Categories data:', categoriesData);
+      console.log('Categories error:', categoriesError);
+      
+      let categoriesToUse: Category[] = [];
+      
+      if (categoriesError) {
+        console.error('Erreur lors du chargement des catégories:', categoriesError);
+        // Si erreur, on crée les catégories depuis les participations
+        if (participationsData && participationsData.length > 0) {
+          const uniqueCategories = new Set<string>();
+          participationsData.forEach((participation: any) => {
+            if (participation.categories_selectionnees && Array.isArray(participation.categories_selectionnees)) {
+              participation.categories_selectionnees.forEach((cat: string) => {
+                uniqueCategories.add(cat);
+              });
+            }
+          });
+          
+          categoriesToUse = Array.from(uniqueCategories).map((name, index) => ({
+            id: index + 1,
+            name: name,
+            description: '',
+            order_index: index + 1,
+            created_at: null
+          }));
+        }
+      } else if (!categoriesData || categoriesData.length === 0) {
+        // Si la table est vide, créer les catégories depuis les participations
+        console.log('Table vote_categories est vide, création des catégories depuis les participations');
+        if (participationsData && participationsData.length > 0) {
+          const uniqueCategories = new Set<string>();
+          participationsData.forEach((participation: any) => {
+            if (participation.categories_selectionnees && Array.isArray(participation.categories_selectionnees)) {
+              participation.categories_selectionnees.forEach((cat: string) => {
+                uniqueCategories.add(cat);
+              });
+            }
+          });
+          
+          // Créer les catégories dans la base de données
+          const categoriesToInsert = Array.from(uniqueCategories).map((name, index) => ({
+            name: name,
+            description: '',
+            order_index: index + 1
+          }));
+          
+          const { error: insertError } = await supabase
+            .from('vote_categories')
+            .insert(categoriesToInsert);
+          
+          if (insertError) {
+            console.error('Erreur lors de la création des catégories:', insertError);
+            // Utiliser les catégories en mémoire même si l'insertion échoue
+            categoriesToUse = Array.from(uniqueCategories).map((name, index) => ({
+              id: index + 1,
+              name: name,
+              description: '',
+              order_index: index + 1,
+              created_at: null
+            }));
+          } else {
+            // Recharger les catégories depuis la base
+            const { data: newCategoriesData, error: reloadError } = await supabase
+              .from('vote_categories')
+              .select('*')
+              .order('id');
+            
+            if (!reloadError && newCategoriesData) {
+              categoriesToUse = newCategoriesData.map((cat: any, index: number) => ({
+                id: cat.id,
+                name: cat.name,
+                description: cat.description || '',
+                order_index: cat.order_index !== undefined ? cat.order_index : index + 1,
+                created_at: cat.created_at
+              }));
+            }
+          }
+        }
+      } else {
+        // Mapper les données pour s'assurer que description et order_index existent
+        categoriesToUse = categoriesData.map((cat: any, index: number) => ({
+          id: cat.id,
+          name: cat.name,
+          description: cat.description || '',
+          order_index: cat.order_index !== undefined ? cat.order_index : index + 1,
+          created_at: cat.created_at
+        }));
+      }
+      
+      console.log('=== CATEGORIES LOADED ===', categoriesToUse);
+      setCategories(categoriesToUse);
 
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
@@ -190,12 +284,16 @@ const VoteComponent: React.FC = () => {
     participations.forEach(participation => {
       const votes: { [categoryId: number]: number } = {};
       
-      participation.categories_selectionnees.forEach(categoryId => {
-        const vote = currentVotes.find(
-          v => v.participationId === participation.id && v.categoryId === parseInt(categoryId)
-        );
-        if (vote) {
-          votes[parseInt(categoryId)] = vote.voteValue;
+      participation.categories_selectionnees.forEach(categoryName => {
+        // Trouver l'ID de la catégorie à partir de son nom
+        const category = categories.find(cat => cat.name === categoryName);
+        if (category) {
+          const vote = currentVotes.find(
+            v => v.participationId === participation.id && v.categoryId === category.id
+          );
+          if (vote) {
+            votes[category.id] = vote.voteValue;
+          }
         }
       });
       
@@ -205,7 +303,7 @@ const VoteComponent: React.FC = () => {
     });
     
     setVoteSummary(summary);
-  }, [participations, currentVotes]);
+  }, [participations, currentVotes, categories]);
 
   useEffect(() => {
     if (currentStep === 5) {
@@ -217,9 +315,21 @@ const VoteComponent: React.FC = () => {
     const category = categories[categoryIndex];
     if (!category) return null;
 
-    const categoryParticipations = participations.filter(participation => 
-      participation.categories_selectionnees.includes(category.id.toString())
-    );
+    console.log('=== DEBUG CATEGORY STEP ===');
+    console.log('Current category:', category);
+    console.log('Total participations:', participations.length);
+    console.log('Participations data:', participations);
+    
+    const categoryParticipations = participations.filter(participation => {
+      console.log(`Checking participation ${participation.nom_etablissement}:`, {
+        categories_selectionnees: participation.categories_selectionnees,
+        includes: participation.categories_selectionnees.includes(category.name)
+      });
+      return participation.categories_selectionnees.includes(category.name);
+    });
+    
+    console.log('Filtered participations:', categoryParticipations.length);
+    console.log('Category participations:', categoryParticipations);
 
     return (
       <div className="space-y-6">
@@ -269,6 +379,13 @@ const VoteComponent: React.FC = () => {
       </div>
     );
   }
+
+  console.log('=== RENDER VOTECOMPONENT ===');
+  console.log('Current step:', currentStep);
+  console.log('Categories count:', categories.length);
+  console.log('Participations count:', participations.length);
+  console.log('Categories:', categories);
+  console.log('Participations:', participations);
 
   return (
     <div className="max-w-7xl mx-auto p-6">

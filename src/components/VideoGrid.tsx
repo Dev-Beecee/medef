@@ -123,6 +123,11 @@ const VideoGrid: React.FC<VideoGridProps> = ({
   getVoteForParticipation, 
   onVote 
 }) => {
+  console.log('=== VIDEOGRID RENDER ===');
+  console.log('Participations received:', participations);
+  console.log('Participations count:', participations.length);
+  console.log('Category ID:', categoryId);
+  
   const [displayedParticipations, setDisplayedParticipations] = useState(12);
   const [isMobile, setIsMobile] = useState(false);
 
